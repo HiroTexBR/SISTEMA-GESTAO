@@ -110,7 +110,7 @@ export default function DashboardPage() {
         </div>
         <button
           onClick={carregarDados}
-          className="p-2.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 hover:text-orange-500 hover:border-orange-300 transition-all"
+          className="p-2.5 rounded-full glass-card text-gray-500 dark:text-gray-400 hover:text-amber-500 hover:border-amber-500/50 transition-all shadow-sm"
         >
           <RefreshCw className="w-5 h-5" />
         </button>
@@ -122,29 +122,25 @@ export default function DashboardPage() {
           titulo="Vendas Hoje"
           valor={formatCurrency(resumo?.vendas_hoje || 0)}
           icon={TrendingUp}
-          cor="from-orange-500 to-orange-600"
-          shadow="shadow-orange-500/20"
+          cor="text-amber-500 bg-amber-500/10"
         />
         <KPICard
           titulo="Vendas do Mês"
           valor={formatCurrency(resumo?.vendas_mes || 0)}
           icon={BarChart3}
-          cor="from-blue-500 to-blue-600"
-          shadow="shadow-blue-500/20"
+          cor="text-emerald-500 bg-emerald-500/10"
         />
         <KPICard
           titulo="Comandas Abertas"
           valor={String(resumo?.comandas_abertas || 0)}
           icon={Receipt}
-          cor="from-emerald-500 to-emerald-600"
-          shadow="shadow-emerald-500/20"
+          cor="text-blue-500 bg-blue-500/10"
         />
         <KPICard
           titulo="Ticket Médio"
           valor={formatCurrency(resumo?.ticket_medio_hoje || 0)}
           icon={ShoppingBag}
-          cor="from-purple-500 to-purple-600"
-          shadow="shadow-purple-500/20"
+          cor="text-purple-500 bg-purple-500/10"
         />
       </div>
 
@@ -186,9 +182,11 @@ export default function DashboardPage() {
           </div>
           <div className="space-y-3">
             {produtosMaisVendidos.length > 0 ? produtosMaisVendidos.map((p, i) => (
-              <div key={p.nome} className="flex items-center gap-3">
-                <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0 ${
-                  i === 0 ? 'bg-amber-500' : i === 1 ? 'bg-gray-400' : 'bg-orange-300'
+              <div key={p.nome} className="flex items-center gap-4">
+                <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${
+                  i === 0 ? 'bg-amber-500/20 text-amber-500' : 
+                  i === 1 ? 'bg-gray-400/20 text-gray-400' : 
+                  'bg-orange-900/20 text-orange-400'
                 }`}>{i + 1}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{p.nome}</p>
@@ -211,11 +209,11 @@ export default function DashboardPage() {
               {pedidosAtivos.length} pedidos
             </span>
           </div>
-          <div className="space-y-2 max-h-64 overflow-y-auto">
+          <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
             {pedidosAtivos.length > 0 ? pedidosAtivos.map(p => (
-              <div key={p.id} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50/50 dark:bg-white/5 transition-all hover:bg-gray-100 dark:hover:bg-white/10 border border-transparent dark:border-white/5">
-                <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
-                  p.status === 'novo' ? 'bg-blue-500' : 'bg-amber-500'
+              <div key={p.id} className="flex items-center gap-3 p-3 rounded-2xl glass-card transition-all hover:border-amber-500/30">
+                <div className={`w-2 h-2 rounded-full flex-shrink-0 shadow-glow ${
+                  p.status === 'novo' ? 'bg-blue-400' : 'bg-amber-400 animate-pulse'
                 }`} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 dark:text-white">
@@ -277,14 +275,14 @@ export default function DashboardPage() {
 }
 
 function KPICard({
-  titulo, valor, icon: Icon, cor, shadow
+  titulo, valor, icon: Icon, cor
 }: {
-  titulo: string; valor: string; icon: any; cor: string; shadow: string
+  titulo: string; valor: string; icon: any; cor: string;
 }) {
   return (
-    <div className="glass-card rounded-2xl border border-gray-200 dark:border-white/5 p-4 lg:p-5 transition-all duration-300 hover:shadow-glow hover:-translate-y-1">
-      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${cor} shadow-lg ${shadow} flex items-center justify-center mb-4`}>
-        <Icon className="w-5 h-5 text-white" />
+    <div className="glass-card rounded-3xl p-5 lg:p-6 transition-all duration-300 hover:-translate-y-1">
+      <div className={`w-12 h-12 rounded-full ${cor} flex items-center justify-center mb-5`}>
+        <Icon className="w-6 h-6" />
       </div>
       <p className="text-2xl font-bold text-gray-900 dark:text-white leading-tight">{valor}</p>
       <p className="text-[11px] uppercase tracking-wider font-semibold text-gray-500 dark:text-gray-400 mt-2">{titulo}</p>

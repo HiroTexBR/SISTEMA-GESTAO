@@ -11,9 +11,9 @@ import {
 import { toast } from 'sonner'
 
 const COLUNAS = [
-  { status: 'novo', label: 'Novos Pedidos', cor: 'border-blue-500', badge: 'bg-blue-500', headerBg: 'bg-blue-50/80 dark:bg-blue-500/10' },
-  { status: 'em_preparo', label: 'Em Preparo', cor: 'border-amber-500', badge: 'bg-amber-500', headerBg: 'bg-amber-50/80 dark:bg-amber-500/10' },
-  { status: 'pronto', label: 'Prontos', cor: 'border-emerald-500', badge: 'bg-emerald-500', headerBg: 'bg-emerald-50/80 dark:bg-emerald-500/10' },
+  { status: 'novo', label: 'Novos Pedidos', badge: 'bg-blue-500', headerBg: 'bg-blue-500/5' },
+  { status: 'em_preparo', label: 'Em Preparo', badge: 'bg-amber-500', headerBg: 'bg-amber-500/5' },
+  { status: 'pronto', label: 'Prontos', badge: 'bg-emerald-500', headerBg: 'bg-emerald-500/5' },
 ]
 
 export default function ProducaoPage() {
@@ -96,10 +96,9 @@ export default function ProducaoPage() {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="flex items-center gap-3 p-4 bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-md border-b border-gray-200 dark:border-white/5">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-          <ChefHat className="w-5 h-5 text-white" />
+      <div className="flex items-center gap-4 p-5 glass-card border-b-0 rounded-b-3xl mb-4 mx-4 mt-2">
+        <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center">
+          <ChefHat className="w-6 h-6 text-amber-600" />
         </div>
         <div className="flex-1">
           <h1 className="text-lg font-bold text-gray-900 dark:text-white">Produção</h1>
@@ -111,7 +110,7 @@ export default function ProducaoPage() {
             <span className="text-xs font-bold">{atrasados.length} atrasado{atrasados.length > 1 ? 's' : ''}</span>
           </div>
         )}
-        <button onClick={carregarPedidos} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500">
+        <button onClick={carregarPedidos} className="p-3 rounded-full glass-card hover:text-amber-500 transition-all text-gray-500">
           <RefreshCw className="w-5 h-5" />
         </button>
       </div>
@@ -125,13 +124,13 @@ export default function ProducaoPage() {
         <div className="flex-1 overflow-x-auto">
           <div className="flex gap-4 p-4 h-full min-w-max lg:min-w-0 lg:grid lg:grid-cols-3">
             {COLUNAS.map(col => (
-              <div key={col.status} className={`w-80 lg:w-auto flex flex-col rounded-3xl border-t-4 border-l border-r border-b border-gray-200 dark:border-white/5 ${col.cor} bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-md overflow-hidden shadow-xl`}>
+              <div key={col.status} className={`w-80 lg:w-auto flex flex-col rounded-3xl glass-card overflow-hidden shadow-xl`}>
                 {/* Header coluna */}
-                <div className={`p-4 flex items-center gap-2 border-b border-gray-200 dark:border-white/5 ${col.headerBg}`}>
-                  <div className={`w-6 h-6 rounded-lg ${col.badge} flex items-center justify-center`}>
-                    <span className="text-white text-xs font-bold">{pedidosPorStatus[col.status]?.length || 0}</span>
+                <div className={`p-5 flex items-center gap-3 border-b border-gray-200 dark:border-white/5 ${col.headerBg}`}>
+                  <div className={`w-7 h-7 rounded-full ${col.badge} flex items-center justify-center shadow-glow`}>
+                    <span className="text-white text-xs font-black">{pedidosPorStatus[col.status]?.length || 0}</span>
                   </div>
-                  <h2 className="font-bold text-gray-900 dark:text-white text-sm">{col.label}</h2>
+                  <h2 className="font-bold text-gray-900 dark:text-white text-base">{col.label}</h2>
                 </div>
 
                 {/* Pedidos */}
@@ -170,10 +169,10 @@ function PedidoCard({ pedido, atualizando, onAtualizar }: {
   const minutos = Math.floor(pedido.minutos_espera || 0)
 
   return (
-    <div className={`relative rounded-2xl p-5 transition-all duration-300 hover:shadow-glow hover:-translate-y-1 glass-card border ${
+    <div className={`relative rounded-3xl p-6 transition-all duration-300 hover:shadow-glow hover:-translate-y-1 glass-card ${
       atrasado
-        ? 'border-red-400 dark:border-red-500/50 animate-pulse-orange'
-        : 'border-gray-200 dark:border-white/10'
+        ? 'border-red-400/50 dark:border-red-500/50 animate-pulse-orange'
+        : ''
     }`}>
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
@@ -190,8 +189,8 @@ function PedidoCard({ pedido, atualizando, onAtualizar }: {
           </div>
           <p className="text-xs text-gray-500">#{String(pedido.numero).padStart(4, '0')} · {pedido.garcom_nome}</p>
         </div>
-        <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-xl ${
-          atrasado ? 'bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400' : 'bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-300'
+        <div className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full ${
+          atrasado ? 'bg-red-500/20 text-red-500' : 'bg-gray-500/10 text-gray-500 dark:text-gray-400'
         }`}>
           <Clock className="w-3 h-3" />
           {minutos}min
@@ -228,7 +227,7 @@ function PedidoCard({ pedido, atualizando, onAtualizar }: {
           {pedido.status === 'novo' && (
             <button
               onClick={() => onAtualizar('em_preparo')}
-              className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl transition-all active:scale-95 text-sm"
+              className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 rounded-full transition-all active:scale-95 text-sm shadow-glow"
             >
               👨‍🍳 Iniciar Preparo
             </button>
@@ -236,7 +235,7 @@ function PedidoCard({ pedido, atualizando, onAtualizar }: {
           {pedido.status === 'em_preparo' && (
             <button
               onClick={() => onAtualizar('pronto')}
-              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl transition-all active:scale-95 text-sm"
+              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-full transition-all active:scale-95 text-sm shadow-glow"
             >
               ✅ Marcar como Pronto
             </button>
@@ -244,7 +243,7 @@ function PedidoCard({ pedido, atualizando, onAtualizar }: {
           {pedido.status === 'pronto' && (
             <button
               onClick={() => onAtualizar('entregue')}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-xl transition-all active:scale-95 text-sm"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3.5 rounded-full transition-all active:scale-95 text-sm shadow-glow"
             >
               🛵 Marcar como Entregue
             </button>

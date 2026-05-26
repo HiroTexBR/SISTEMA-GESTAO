@@ -105,14 +105,14 @@ export default function MesasPage() {
       {/* Stats rápidos */}
       <div className="grid grid-cols-4 gap-2">
         {[
-          { label: 'Total', value: stats.total, cor: 'text-gray-700 bg-gray-100 dark:bg-white/5 dark:text-gray-300 dark:border-white/10' },
-          { label: 'Livres', value: stats.livres, cor: 'text-emerald-700 bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' },
-          { label: 'Ocupadas', value: stats.ocupadas, cor: 'text-red-700 bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20' },
-          { label: 'Pagamento', value: stats.aguardando, cor: 'text-amber-700 bg-amber-100 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20' },
+          { label: 'Total', value: stats.total, cor: 'text-gray-900 dark:text-gray-100' },
+          { label: 'Livres', value: stats.livres, cor: 'text-emerald-600 dark:text-emerald-400' },
+          { label: 'Ocupadas', value: stats.ocupadas, cor: 'text-red-600 dark:text-red-400' },
+          { label: 'Pagamento', value: stats.aguardando, cor: 'text-amber-600 dark:text-amber-400' },
         ].map(s => (
-          <div key={s.label} className={`rounded-2xl border border-transparent px-3 py-3 sm:px-4 sm:py-4 text-center transition-all hover:scale-105 ${s.cor}`}>
-            <p className="text-2xl font-bold leading-none mb-1">{s.value}</p>
-            <p className="text-[11px] uppercase tracking-wider font-semibold opacity-70">{s.label}</p>
+          <div key={s.label} className={`glass-card rounded-3xl px-3 py-3 sm:px-4 sm:py-4 text-center transition-all hover:-translate-y-1 ${s.cor}`}>
+            <p className="text-2xl lg:text-3xl font-black leading-none mb-1">{s.value}</p>
+            <p className="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold opacity-60">{s.label}</p>
           </div>
         ))}
       </div>
@@ -121,13 +121,13 @@ export default function MesasPage() {
       <div className="flex gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Buscar mesa..."
-            value={busca}
-            onChange={e => setBusca(e.target.value)}
-            className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all"
-          />
+            <input
+              type="text"
+              placeholder="Buscar mesa..."
+              value={busca}
+              onChange={e => setBusca(e.target.value)}
+              className="w-full glass-card border border-gray-200 dark:border-white/10 rounded-full pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all text-gray-900 dark:text-white placeholder:text-gray-400"
+            />
         </div>
       </div>
 
@@ -137,10 +137,10 @@ export default function MesasPage() {
           <button
             key={s}
             onClick={() => setFiltroStatus(s)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all flex-shrink-0 ${
+            className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${
               filtroStatus === s
-                ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/25'
-                : 'bg-white dark:bg-white/5 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-white/10 hover:dark:bg-white/10'
+                ? 'bg-orange-500 text-white shadow-glow'
+                : 'glass-card text-gray-600 dark:text-gray-300 hover:-translate-y-0.5'
             }`}
           >
             {s === 'todos' ? 'Todos' : getStatusMesaLabel(s)}
@@ -174,16 +174,11 @@ function MesaCard({ mesa, onClick }: { mesa: Mesa & { comanda?: Comanda }, onCli
     <button
       onClick={onClick}
       disabled={inatival}
-      className={`relative w-full text-left rounded-2xl border overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-glow glass-card
-        ${getStatusBorderColor(mesa.status)}
+      className={`relative w-full text-left rounded-3xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-glow glass-card
         ${inatival ? 'opacity-50 cursor-not-allowed grayscale' : ''}
-        bg-white
       `}
     >
-      {/* Status stripe */}
-      <div className={`h-2 w-full ${getStatusMesaColor(mesa.status)}`} />
-
-      <div className="p-4">
+      <div className="p-5">
         {/* Número da mesa */}
         <div className="flex items-start justify-between mb-3">
           <div>
@@ -214,11 +209,10 @@ function MesaCard({ mesa, onClick }: { mesa: Mesa & { comanda?: Comanda }, onCli
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-center mt-2">
-            <span className={`text-xs font-semibold px-2 py-1 rounded-lg ${
-              mesa.status === 'livre'
-                ? 'text-emerald-700 bg-emerald-100'
-                : 'text-gray-500 bg-gray-100'
+          <div className="flex items-center mt-3">
+            <span className={`text-xs font-bold px-3 py-1.5 rounded-full ${
+              mesa.status === 'livre' ? 'badge-livre' :
+              mesa.status === 'inativa' ? 'badge-inativa' : 'badge-preparo'
             }`}>
               {getStatusMesaLabel(mesa.status)}
             </span>
@@ -230,20 +224,15 @@ function MesaCard({ mesa, onClick }: { mesa: Mesa & { comanda?: Comanda }, onCli
 }
 
 function StatusDot({ status }: { status: string }) {
-  return (
-    <div className={`w-3 h-3 rounded-full flex-shrink-0 ${getStatusMesaColor(status)} ${
-      status === 'ocupada' ? 'animate-pulse' : ''
-    }`} />
-  )
-}
+  const badgeCls = 
+    status === 'livre' ? 'badge-livre' : 
+    status === 'ocupada' ? 'badge-ocupada' :
+    status === 'aguardando_pagamento' ? 'badge-aguardando' :
+    status === 'em_preparo' ? 'badge-preparo' : 'badge-inativa';
 
-function getStatusBorderColor(status: string): string {
-  const m: Record<string, string> = {
-    livre: 'border-emerald-200 dark:border-emerald-500/30',
-    ocupada: 'border-red-200 dark:border-red-500/30 shadow-[0_0_15px_rgba(248,113,113,0.1)] dark:shadow-[0_0_20px_rgba(248,113,113,0.15)]',
-    aguardando_pagamento: 'border-amber-200 dark:border-amber-500/30',
-    em_preparo: 'border-blue-200 dark:border-blue-500/30',
-    inativa: 'border-gray-200 dark:border-white/10',
-  }
-  return m[status] || 'border-gray-200'
+  return (
+    <div className={`w-3.5 h-3.5 rounded-full flex-shrink-0 ${badgeCls} ${
+      status === 'ocupada' ? 'animate-pulse' : ''
+    }`} style={{ opacity: 1 }} />
+  )
 }

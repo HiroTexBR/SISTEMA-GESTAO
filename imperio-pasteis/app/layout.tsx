@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from 'next'
-import { Outfit } from 'next/font/google'
+import { Epilogue } from 'next/font/google'
 import './globals.css'
 import { Toaster } from 'sonner'
 
-const outfit = Outfit({ subsets: ['latin'] })
+const font = Epilogue({ subsets: ['latin'], variable: '--font-sans' })
 
 export const metadata: Metadata = {
   title: 'IMPÉRIO PASTÉIS — Sistema de Comandas',
@@ -36,7 +36,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
-      <body className={`${outfit.className} antialiased`}>
+      <body className={`${font.variable} font-sans antialiased`}>
         {children}
         <Toaster
           position="top-center"
