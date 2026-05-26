@@ -66,16 +66,16 @@ export default function LoginPage() {
       <div className="relative w-full max-w-sm">
         {/* Logo and Typography */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-surface-card border border-surface-border shadow-glow mb-6">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-surface-card shadow-glow mb-6">
             <UtensilsCrossed className="w-8 h-8 text-brand-accent" />
           </div>
-          <h1 className="text-4xl font-bold text-text-main font-[Fraunces] tracking-tight mb-1">IMPÉRIO</h1>
+          <h1 className="text-4xl font-bold text-text-main font-display tracking-tight mb-1">IMPÉRIO</h1>
           <p className="text-brand-accent text-sm font-bold tracking-[0.2em] uppercase">Alta Gastronomia</p>
         </div>
 
         {/* Login Form */}
         <div className="glass-card p-8 rounded-[2rem]">
-          <h2 className="text-text-main font-[Fraunces] font-bold text-2xl mb-6 text-center">Acesso ao Sistema</h2>
+          <h2 className="text-text-main font-display font-bold text-2xl mb-6 text-center">Acesso ao Sistema</h2>
 
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
