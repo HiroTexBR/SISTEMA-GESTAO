@@ -31,7 +31,7 @@ export default async function proxy(request: NextRequest) {
       .from('usuarios').select('cargo').eq('id', user.id).single()
     const cargo = usuario?.cargo || 'garcom'
     const map: Record<string, string> = {
-      admin: '/dashboard', caixa: '/caixa', garcom: '/mesas', producao: '/producao'
+      admin: '/', caixa: '/caixa', garcom: '/mesas', producao: '/producao'
     }
     return NextResponse.redirect(new URL(map[cargo] || '/mesas', request.url))
   }
