@@ -13,7 +13,7 @@ import {
 import { toast } from 'sonner'
 
 const NAV_ITEMS = [
-  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', cargos: ['admin'] },
+  { href: '/', icon: LayoutDashboard, label: 'Dashboard', cargos: ['admin'] },
   { href: '/mesas', icon: UtensilsCrossed, label: 'Mesas', cargos: ['admin', 'garcom', 'caixa'] },
   { href: '/producao', icon: ChefHat, label: 'Produção', cargos: ['admin', 'producao'] },
   { href: '/caixa', icon: CreditCard, label: 'Caixa', cargos: ['admin', 'caixa'] },
@@ -27,7 +27,7 @@ const NAV_ITEMS = [
 
 const BOTTOM_NAV_ITEMS: Record<string, typeof NAV_ITEMS> = {
   admin: [
-    { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', cargos: ['admin'] },
+    { href: '/', icon: LayoutDashboard, label: 'Dashboard', cargos: ['admin'] },
     { href: '/mesas', icon: UtensilsCrossed, label: 'Mesas', cargos: ['admin'] },
     { href: '/producao', icon: ChefHat, label: 'Produção', cargos: ['admin'] },
     { href: '/caixa', icon: CreditCard, label: 'Caixa', cargos: ['admin'] },
