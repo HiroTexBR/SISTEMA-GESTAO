@@ -1,0 +1,21 @@
+{
+  "name": "imperio-pasteis-gateway",
+  "version": "1.0.0",
+  "description": "Gateway de impressão ESC/POS para o Sistema Império Pastéis",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0",
+    "dotenv": "^16.0.0",
+    "escpos": "latest",
+    "escpos-network": "latest",
+    "escpos-usb": "latest",
+    "ws": "^8.21.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
+}
