@@ -119,22 +119,22 @@ export default function FuncionariosPage() {
   }
 
   const CARGOS = {
-    admin: { label: 'Administrador', cor: 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400' },
-    caixa: { label: 'Caixa', cor: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' },
-    garcom: { label: 'Garçom', cor: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400' },
-    producao: { label: 'Produção', cor: 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400' },
+    admin: { label: 'Administrador', cor: 'bg-[#D4A373]/10 text-[#D4A373] border border-[#D4A373]/20' },
+    caixa: { label: 'Caixa', cor: 'bg-[#739E82]/10 text-[#739E82] border border-[#739E82]/20' },
+    garcom: { label: 'Garçom', cor: 'bg-[#7592B8]/10 text-[#7592B8] border border-[#7592B8]/20' },
+    producao: { label: 'Produção', cor: 'bg-brand-accent/10 text-brand-accent border border-brand-accent/20' },
   }
 
   return (
     <div className="p-4 lg:p-6 space-y-6 animate-fade-in max-w-7xl mx-auto">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Funcionários</h1>
-          <p className="text-sm text-gray-500">{usuarios.length} usuários cadastrados</p>
+          <h1 className="text-2xl font-[Fraunces] font-bold text-text-main">Funcionários</h1>
+          <p className="text-sm font-bold uppercase tracking-wider text-text-muted mt-1">{usuarios.length} usuários cadastrados</p>
         </div>
         <button
           onClick={abrirNovo}
-          className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold px-4 py-2.5 rounded-xl shadow-lg shadow-orange-500/20 active:scale-95 transition-all"
+          className="flex items-center gap-2 bg-brand-accent hover:bg-[#D15C39] text-white font-bold px-4 py-2.5 rounded-xl shadow-glow active:scale-95 transition-all"
         >
           <UserPlus className="w-5 h-5" />
           <span className="hidden sm:inline">Novo</span>
@@ -148,27 +148,27 @@ export default function FuncionariosPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {usuarios.map(u => (
-            <div key={u.id} className={`glass-card rounded-2xl p-5 transition-all duration-300 hover:shadow-glow hover:-translate-y-1 ${u.status === 'ativo' ? 'opacity-100' : 'opacity-50 grayscale'}`}>
-              <div className="flex justify-between items-start mb-4">
-                <div className="w-12 h-12 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center shadow-inner">
-                  <Users className="w-6 h-6 text-gray-500 dark:text-gray-300" />
+            <div key={u.id} className={`glass-card rounded-[2rem] p-6 transition-all duration-300 hover:shadow-glow hover:-translate-y-1 ${u.status === 'ativo' ? 'opacity-100' : 'opacity-50 grayscale'}`}>
+              <div className="flex justify-between items-start mb-5">
+                <div className="w-12 h-12 bg-surface-bg border border-surface-border rounded-xl flex items-center justify-center shadow-inner">
+                  <Users className="w-6 h-6 text-text-muted" />
                 </div>
-                <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${CARGOS[u.cargo].cor}`}>
+                <span className={`text-[10px] uppercase tracking-wider font-bold px-3 py-1.5 rounded-lg ${CARGOS[u.cargo].cor}`}>
                   {CARGOS[u.cargo].label}
                 </span>
               </div>
               
-              <h3 className="font-bold text-gray-900 dark:text-white truncate">{u.nome}</h3>
-              <p className="text-sm text-gray-500 truncate mb-4">{u.email}</p>
+              <h3 className="font-bold font-[Fraunces] text-lg text-text-main truncate">{u.nome}</h3>
+              <p className="text-xs text-text-muted font-medium truncate mb-5">{u.email}</p>
 
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-white/10 mt-4">
-                <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${u.status === 'ativo' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'}`}>
+              <div className="flex items-center justify-between pt-4 border-t border-surface-border mt-4">
+                <span className={`text-[10px] uppercase tracking-wider font-bold px-3 py-1.5 rounded-lg ${u.status === 'ativo' ? 'bg-[#739E82]/10 text-[#739E82] border border-[#739E82]/20' : 'bg-[#D96C6C]/10 text-[#D96C6C] border border-[#D96C6C]/20'}`}>
                   {u.status}
                 </span>
                 
                 <button
                   onClick={() => abrirEditar(u)}
-                  className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
+                  className="p-2 text-text-muted hover:text-brand-accent hover:bg-brand-accent/10 rounded-xl transition-all"
                 >
                   <Edit2 className="w-4 h-4" />
                 </button>
@@ -180,51 +180,64 @@ export default function FuncionariosPage() {
 
       {/* Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-3xl p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="glass-card w-full max-w-md rounded-[2rem] p-8 space-y-5">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-2xl font-[Fraunces] font-bold text-text-main">
                 {editando ? 'Editar Funcionário' : 'Novo Funcionário'}
               </h2>
-              <button onClick={() => setShowForm(false)} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800">
+              <button onClick={() => setShowForm(false)} className="p-2 rounded-xl text-text-muted hover:text-text-main hover:bg-surface-border transition-all">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {!editando && (
-              <div className="p-3 bg-blue-50 text-blue-700 text-sm rounded-xl flex gap-2">
+              <div className="p-4 bg-[#7592B8]/10 text-[#7592B8] text-xs font-medium rounded-xl flex gap-3 border border-[#7592B8]/20">
                 <Shield className="w-5 h-5 flex-shrink-0" />
-                <p><strong>Aviso:</strong> A criação completa de usuários deve ser feita pelo Painel do Supabase (Authentication) para segurança do sistema.</p>
+                <p><strong>Aviso:</strong> A criação de usuários aqui realiza o login automático (restrição do Supabase no frontend). Para gerenciar com segurança, use o Painel do Supabase.</p>
               </div>
             )}
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Nome completo</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Nome completo</label>
                 <input
                   value={form.nome}
                   onChange={e => setForm(f => ({...f, nome: e.target.value}))}
-                  className="w-full bg-gray-100 dark:bg-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  className="w-full bg-surface-bg border border-surface-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-brand-accent transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Email</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Email</label>
                 <input
                   type="email"
                   value={form.email}
                   disabled={!!editando}
                   onChange={e => setForm(f => ({...f, email: e.target.value}))}
-                  className="w-full bg-gray-100 dark:bg-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 disabled:opacity-50"
+                  className="w-full bg-surface-bg border border-surface-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-brand-accent transition-colors disabled:opacity-50"
                 />
               </div>
 
+              {!editando && (
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Senha</label>
+                  <input
+                    type="password"
+                    value={form.senha}
+                    onChange={e => setForm(f => ({...f, senha: e.target.value}))}
+                    placeholder="Mínimo 6 caracteres"
+                    className="w-full bg-surface-bg border border-surface-border rounded-xl px-4 py-3 text-sm text-text-main placeholder-text-muted/50 focus:outline-none focus:border-brand-accent transition-colors"
+                  />
+                </div>
+              )}
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Cargo</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Cargo</label>
                 <select
                   value={form.cargo}
                   onChange={e => setForm(f => ({...f, cargo: e.target.value as any}))}
-                  className="w-full bg-gray-100 dark:bg-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  className="w-full bg-surface-bg border border-surface-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-brand-accent transition-colors"
                 >
                   <option value="garcom">Garçom</option>
                   <option value="caixa">Caixa</option>
@@ -235,11 +248,11 @@ export default function FuncionariosPage() {
 
               {editando && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Status</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Status</label>
                   <select
                     value={form.status}
                     onChange={e => setForm(f => ({...f, status: e.target.value as any}))}
-                    className="w-full bg-gray-100 dark:bg-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    className="w-full bg-surface-bg border border-surface-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-brand-accent transition-colors"
                   >
                     <option value="ativo">Ativo</option>
                     <option value="inativo">Inativo</option>
@@ -248,14 +261,14 @@ export default function FuncionariosPage() {
               )}
             </div>
 
-            <div className="flex gap-3 pt-4">
-              <button onClick={() => setShowForm(false)} className="flex-1 border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold py-3.5 rounded-2xl transition-all">
+            <div className="flex gap-3 pt-5 border-t border-surface-border">
+              <button onClick={() => setShowForm(false)} className="flex-1 bg-surface-bg border border-surface-border text-text-main font-bold py-3.5 rounded-xl transition-all hover:bg-surface-border">
                 Cancelar
               </button>
               <button
                 onClick={salvar}
                 disabled={salvando}
-                className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-orange-500/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 bg-brand-accent hover:bg-[#D15C39] text-white font-bold py-3.5 rounded-xl shadow-glow transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {salvando ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
                 Salvar
