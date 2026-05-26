@@ -48,7 +48,7 @@ export default function LoginPage() {
       toast.success(`Bem-vindo(a), ${usuario?.nome || 'usuário'}!`)
 
       const redirectMap: Record<string, string> = {
-        admin: '/dashboard',
+        admin: '/',
         caixa: '/caixa',
         garcom: '/mesas',
         producao: '/producao',
