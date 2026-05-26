@@ -101,12 +101,32 @@ export default function FuncionariosPage() {
           setSalvando(false)
           return
         }
-        
-        // Criar usuário via Supabase Auth (como estamos no client, fará login automático, 
-        // em um cenário real usaria uma edge function com supabase.auth.admin.createUser)
-        // Por simplicidade do MVP, vamos instruir a usar o painel do supabase
-        toast.info('Para criar novos usuários, utilize o Painel do Supabase -> Authentication.')
-        // await supabase.auth.signUp({ ... }) // <- loga o usuário recém criado
+        // Criar usuário via Supabase Auth
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email: form.email,
+          password: form.senha,
+          options: {
+            data: {
+              nome: form.nome,
+              cargo: form.cargo
+            }
+          }
+        })
+
+        if (signUpError) throw signUpError
+
+        // Tentar inserir na tabela pública (caso não tenha trigger automática)
+        if (data?.user) {
+          await supabase.from('usuarios').insert({
+            id: data.user.id,
+            nome: form.nome,
+            email: form.email,
+            cargo: form.cargo,
+            status: form.status
+          }).select()
+        }
+
+        toast.success('✅ Usuário criado com sucesso!')
       }
 
       setShowForm(false)
@@ -191,12 +211,7 @@ export default function FuncionariosPage() {
               </button>
             </div>
 
-            {!editando && (
-              <div className="p-4 bg-[#7592B8]/10 text-[#7592B8] text-xs font-medium rounded-xl flex gap-3 border border-[#7592B8]/20">
-                <Shield className="w-5 h-5 flex-shrink-0" />
-                <p><strong>Aviso:</strong> A criação de usuários aqui realiza o login automático (restrição do Supabase no frontend). Para gerenciar com segurança, use o Painel do Supabase.</p>
-              </div>
-            )}
+            {/* O aviso de criação foi removido conforme solicitado */}
 
             <div className="space-y-4">
               <div>
