@@ -87,7 +87,7 @@ export default function MesasPage() {
   }
 
   return (
-    <div className="p-4 lg:p-6 space-y-5 animate-fade-in">
+    <div className="p-4 lg:p-6 space-y-6 animate-fade-in max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <div>
@@ -105,14 +105,14 @@ export default function MesasPage() {
       {/* Stats rápidos */}
       <div className="grid grid-cols-4 gap-2">
         {[
-          { label: 'Total', value: stats.total, cor: 'text-gray-700 bg-gray-100' },
-          { label: 'Livres', value: stats.livres, cor: 'text-emerald-700 bg-emerald-100' },
-          { label: 'Ocupadas', value: stats.ocupadas, cor: 'text-red-700 bg-red-100' },
-          { label: 'Pagamento', value: stats.aguardando, cor: 'text-amber-700 bg-amber-100' },
+          { label: 'Total', value: stats.total, cor: 'text-gray-700 bg-gray-100 dark:bg-white/5 dark:text-gray-300 dark:border-white/10' },
+          { label: 'Livres', value: stats.livres, cor: 'text-emerald-700 bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' },
+          { label: 'Ocupadas', value: stats.ocupadas, cor: 'text-red-700 bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20' },
+          { label: 'Pagamento', value: stats.aguardando, cor: 'text-amber-700 bg-amber-100 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20' },
         ].map(s => (
-          <div key={s.label} className={`rounded-xl px-3 py-2 text-center ${s.cor}`}>
-            <p className="text-xl font-bold leading-tight">{s.value}</p>
-            <p className="text-[10px] font-medium opacity-80">{s.label}</p>
+          <div key={s.label} className={`rounded-2xl border border-transparent px-3 py-3 sm:px-4 sm:py-4 text-center transition-all hover:scale-105 ${s.cor}`}>
+            <p className="text-2xl font-bold leading-none mb-1">{s.value}</p>
+            <p className="text-[11px] uppercase tracking-wider font-semibold opacity-70">{s.label}</p>
           </div>
         ))}
       </div>
@@ -139,8 +139,8 @@ export default function MesasPage() {
             onClick={() => setFiltroStatus(s)}
             className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all flex-shrink-0 ${
               filtroStatus === s
-                ? 'bg-orange-500 text-white'
-                : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700'
+                ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/25'
+                : 'bg-white dark:bg-white/5 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-white/10 hover:dark:bg-white/10'
             }`}
           >
             {s === 'todos' ? 'Todos' : getStatusMesaLabel(s)}
@@ -174,10 +174,10 @@ function MesaCard({ mesa, onClick }: { mesa: Mesa & { comanda?: Comanda }, onCli
     <button
       onClick={onClick}
       disabled={inatival}
-      className={`mesa-card relative w-full text-left rounded-2xl border-2 overflow-hidden transition-all
+      className={`relative w-full text-left rounded-2xl border overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-glow glass-card
         ${getStatusBorderColor(mesa.status)}
-        ${inatival ? 'opacity-50 cursor-not-allowed' : ''}
-        bg-white dark:bg-gray-900
+        ${inatival ? 'opacity-50 cursor-not-allowed grayscale' : ''}
+        bg-white
       `}
     >
       {/* Status stripe */}
@@ -239,11 +239,11 @@ function StatusDot({ status }: { status: string }) {
 
 function getStatusBorderColor(status: string): string {
   const m: Record<string, string> = {
-    livre: 'border-emerald-200 dark:border-emerald-900',
-    ocupada: 'border-red-200 dark:border-red-900',
-    aguardando_pagamento: 'border-amber-200 dark:border-amber-900',
-    em_preparo: 'border-blue-200 dark:border-blue-900',
-    inativa: 'border-gray-200 dark:border-gray-700',
+    livre: 'border-emerald-200 dark:border-emerald-500/30',
+    ocupada: 'border-red-200 dark:border-red-500/30 shadow-[0_0_15px_rgba(248,113,113,0.1)] dark:shadow-[0_0_20px_rgba(248,113,113,0.15)]',
+    aguardando_pagamento: 'border-amber-200 dark:border-amber-500/30',
+    em_preparo: 'border-blue-200 dark:border-blue-500/30',
+    inativa: 'border-gray-200 dark:border-white/10',
   }
   return m[status] || 'border-gray-200'
 }

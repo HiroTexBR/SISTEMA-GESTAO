@@ -88,18 +88,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const bottomItems = BOTTOM_NAV_ITEMS[cargo] || []
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-950 overflow-hidden">
+    <div className="flex h-screen bg-gray-50 dark:bg-[#09090b] overflow-hidden">
       {/* Sidebar — desktop/tablet landscape */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900
-        border-r border-gray-200 dark:border-gray-800
+        fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-[#09090b]
+        border-r border-gray-200 dark:border-white/5
         transform transition-transform duration-300 ease-in-out
         flex flex-col
         lg:relative lg:translate-x-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Logo */}
-        <div className="flex items-center gap-3 p-5 border-b border-gray-100 dark:border-gray-800">
+        <div className="flex items-center gap-3 p-5 border-b border-gray-100 dark:border-white/5">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/30 flex-shrink-0">
             <UtensilsCrossed className="w-5 h-5 text-white" />
           </div>
@@ -127,8 +127,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 className={`
                   flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
                   ${active
-                    ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                    ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/25'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'
                   }
                 `}
               >
@@ -140,9 +140,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </nav>
 
         {/* Footer da sidebar */}
-        <div className="p-3 border-t border-gray-100 dark:border-gray-800 space-y-2">
+        <div className="p-3 border-t border-gray-100 dark:border-white/5 space-y-2">
           {/* Status online */}
-          <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium ${online ? 'text-emerald-600 bg-emerald-50' : 'text-red-600 bg-red-50'}`}>
+          <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium ${online ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 dark:text-emerald-400' : 'text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-400'}`}>
             {online ? <Wifi className="w-4 h-4" /> : <WifiOff className="w-4 h-4" />}
             {online ? 'Online' : 'Offline'}
           </div>
@@ -162,7 +162,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
           >
             <LogOut className="w-5 h-5" />
             Sair
@@ -173,7 +173,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Overlay da sidebar mobile */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -181,7 +181,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Conteúdo principal */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header mobile */}
-        <header className="lg:hidden flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+        <header className="lg:hidden flex items-center gap-3 px-4 py-3 bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-md border-b border-gray-200 dark:border-white/5 flex-shrink-0 z-30 sticky top-0">
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
@@ -203,7 +203,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {/* Dark mode */}
             <button
               onClick={() => setDark(!dark)}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400"
             >
               {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
@@ -217,7 +217,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Bottom Navigation — mobile */}
         {bottomItems.length > 0 && (
-          <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 safe-bottom z-30">
+          <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-xl border-t border-gray-200 dark:border-white/10 safe-bottom z-30">
             <div className="flex items-center justify-around px-2 py-2">
               {bottomItems.map(({ href, icon: Icon, label }) => {
                 const active = pathname === href || pathname.startsWith(href + '/')

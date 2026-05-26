@@ -119,14 +119,14 @@ export default function FuncionariosPage() {
   }
 
   const CARGOS = {
-    admin: { label: 'Administrador', cor: 'bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300' },
-    caixa: { label: 'Caixa', cor: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300' },
-    garcom: { label: 'Garçom', cor: 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300' },
-    producao: { label: 'Produção', cor: 'bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300' },
+    admin: { label: 'Administrador', cor: 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400' },
+    caixa: { label: 'Caixa', cor: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' },
+    garcom: { label: 'Garçom', cor: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400' },
+    producao: { label: 'Produção', cor: 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400' },
   }
 
   return (
-    <div className="p-4 lg:p-6 space-y-5 animate-fade-in">
+    <div className="p-4 lg:p-6 space-y-6 animate-fade-in max-w-7xl mx-auto">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Funcionários</h1>
@@ -146,12 +146,12 @@ export default function FuncionariosPage() {
           {[1, 2, 3].map(i => <div key={i} className="h-32 skeleton rounded-2xl" />)}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {usuarios.map(u => (
-            <div key={u.id} className={`bg-white dark:bg-gray-900 rounded-2xl border p-5 transition-all ${u.status === 'ativo' ? 'border-gray-200 dark:border-gray-800' : 'border-gray-100 dark:border-gray-900 opacity-60'}`}>
-              <div className="flex justify-between items-start mb-3">
-                <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-                  <Users className="w-6 h-6 text-gray-500" />
+            <div key={u.id} className={`glass-card rounded-2xl p-5 transition-all duration-300 hover:shadow-glow hover:-translate-y-1 ${u.status === 'ativo' ? 'opacity-100' : 'opacity-50 grayscale'}`}>
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-12 h-12 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center shadow-inner">
+                  <Users className="w-6 h-6 text-gray-500 dark:text-gray-300" />
                 </div>
                 <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${CARGOS[u.cargo].cor}`}>
                   {CARGOS[u.cargo].label}
@@ -161,8 +161,8 @@ export default function FuncionariosPage() {
               <h3 className="font-bold text-gray-900 dark:text-white truncate">{u.nome}</h3>
               <p className="text-sm text-gray-500 truncate mb-4">{u.email}</p>
 
-              <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${u.status === 'ativo' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+              <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-white/10 mt-4">
+                <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${u.status === 'ativo' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'}`}>
                   {u.status}
                 </span>
                 

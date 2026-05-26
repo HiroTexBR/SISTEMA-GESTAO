@@ -11,9 +11,9 @@ import {
 import { toast } from 'sonner'
 
 const COLUNAS = [
-  { status: 'novo', label: 'Novos Pedidos', cor: 'border-blue-400 dark:border-blue-600', badge: 'bg-blue-500', headerBg: 'bg-blue-50 dark:bg-blue-950/30' },
-  { status: 'em_preparo', label: 'Em Preparo', cor: 'border-amber-400 dark:border-amber-600', badge: 'bg-amber-500', headerBg: 'bg-amber-50 dark:bg-amber-950/30' },
-  { status: 'pronto', label: 'Prontos', cor: 'border-emerald-400 dark:border-emerald-600', badge: 'bg-emerald-500', headerBg: 'bg-emerald-50 dark:bg-emerald-950/30' },
+  { status: 'novo', label: 'Novos Pedidos', cor: 'border-blue-500', badge: 'bg-blue-500', headerBg: 'bg-blue-50/80 dark:bg-blue-500/10' },
+  { status: 'em_preparo', label: 'Em Preparo', cor: 'border-amber-500', badge: 'bg-amber-500', headerBg: 'bg-amber-50/80 dark:bg-amber-500/10' },
+  { status: 'pronto', label: 'Prontos', cor: 'border-emerald-500', badge: 'bg-emerald-500', headerBg: 'bg-emerald-50/80 dark:bg-emerald-500/10' },
 ]
 
 export default function ProducaoPage() {
@@ -97,7 +97,7 @@ export default function ProducaoPage() {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center gap-3 p-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+      <div className="flex items-center gap-3 p-4 bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-md border-b border-gray-200 dark:border-white/5">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
           <ChefHat className="w-5 h-5 text-white" />
         </div>
@@ -125,9 +125,9 @@ export default function ProducaoPage() {
         <div className="flex-1 overflow-x-auto">
           <div className="flex gap-4 p-4 h-full min-w-max lg:min-w-0 lg:grid lg:grid-cols-3">
             {COLUNAS.map(col => (
-              <div key={col.status} className={`w-80 lg:w-auto flex flex-col rounded-2xl border-2 ${col.cor} ${col.headerBg} overflow-hidden`}>
+              <div key={col.status} className={`w-80 lg:w-auto flex flex-col rounded-3xl border-t-4 border-l border-r border-b border-gray-200 dark:border-white/5 ${col.cor} bg-white/50 dark:bg-[#18181b]/60 backdrop-blur-md overflow-hidden shadow-xl`}>
                 {/* Header coluna */}
-                <div className="p-4 flex items-center gap-2 border-b border-current/20">
+                <div className={`p-4 flex items-center gap-2 border-b border-gray-200 dark:border-white/5 ${col.headerBg}`}>
                   <div className={`w-6 h-6 rounded-lg ${col.badge} flex items-center justify-center`}>
                     <span className="text-white text-xs font-bold">{pedidosPorStatus[col.status]?.length || 0}</span>
                   </div>
@@ -170,10 +170,10 @@ function PedidoCard({ pedido, atualizando, onAtualizar }: {
   const minutos = Math.floor(pedido.minutos_espera || 0)
 
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-2xl border p-4 shadow-sm transition-all ${
+    <div className={`relative rounded-2xl p-5 transition-all duration-300 hover:shadow-glow hover:-translate-y-1 glass-card border ${
       atrasado
-        ? 'border-red-300 dark:border-red-700 animate-pulse-orange'
-        : 'border-gray-200 dark:border-gray-800'
+        ? 'border-red-400 dark:border-red-500/50 animate-pulse-orange'
+        : 'border-gray-200 dark:border-white/10'
     }`}>
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
@@ -191,7 +191,7 @@ function PedidoCard({ pedido, atualizando, onAtualizar }: {
           <p className="text-xs text-gray-500">#{String(pedido.numero).padStart(4, '0')} · {pedido.garcom_nome}</p>
         </div>
         <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-xl ${
-          atrasado ? 'bg-red-100 text-red-600' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
+          atrasado ? 'bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400' : 'bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-300'
         }`}>
           <Clock className="w-3 h-3" />
           {minutos}min

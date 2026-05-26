@@ -99,7 +99,7 @@ export default function DashboardPage() {
   if (loading) return <DashboardSkeleton />
 
   return (
-    <div className="p-4 lg:p-6 space-y-6 animate-fade-in">
+    <div className="p-4 lg:p-6 space-y-6 animate-fade-in max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -150,7 +150,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Gráfico de vendas por hora */}
-        <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
+        <div className="lg:col-span-2 glass-card rounded-2xl border border-gray-200 dark:border-white/5 p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-gray-900 dark:text-white">Vendas por Hora — Hoje</h2>
             <TrendingUp className="w-5 h-5 text-orange-500" />
@@ -179,7 +179,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Produtos mais vendidos */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
+        <div className="glass-card rounded-2xl border border-gray-200 dark:border-white/5 p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-gray-900 dark:text-white">Mais Vendidos</h2>
             <Flame className="w-5 h-5 text-orange-500" />
@@ -204,7 +204,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Pedidos ativos */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
+        <div className="glass-card rounded-2xl border border-gray-200 dark:border-white/5 p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-gray-900 dark:text-white">Produção Agora</h2>
             <span className="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded-full font-medium">
@@ -213,7 +213,7 @@ export default function DashboardPage() {
           </div>
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {pedidosAtivos.length > 0 ? pedidosAtivos.map(p => (
-              <div key={p.id} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800">
+              <div key={p.id} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50/50 dark:bg-white/5 transition-all hover:bg-gray-100 dark:hover:bg-white/10 border border-transparent dark:border-white/5">
                 <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
                   p.status === 'novo' ? 'bg-blue-500' : 'bg-amber-500'
                 }`} />
@@ -238,14 +238,14 @@ export default function DashboardPage() {
         </div>
 
         {/* Status das impressoras */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
+        <div className="glass-card rounded-2xl border border-gray-200 dark:border-white/5 p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-gray-900 dark:text-white">Impressoras</h2>
             <Printer className="w-5 h-5 text-gray-400" />
           </div>
           <div className="space-y-3">
             {impressorasStatus.length > 0 ? impressorasStatus.map(imp => (
-              <div key={imp.nome} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800">
+              <div key={imp.nome} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50/50 dark:bg-white/5 transition-all hover:bg-gray-100 dark:hover:bg-white/10 border border-transparent dark:border-white/5">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
                   imp.status === 'online' ? 'bg-emerald-100 dark:bg-emerald-900/30' :
                   imp.status === 'offline' ? 'bg-red-100 dark:bg-red-900/30' :
@@ -282,12 +282,12 @@ function KPICard({
   titulo: string; valor: string; icon: any; cor: string; shadow: string
 }) {
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-4 lg:p-5">
-      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${cor} shadow-lg ${shadow} flex items-center justify-center mb-3`}>
+    <div className="glass-card rounded-2xl border border-gray-200 dark:border-white/5 p-4 lg:p-5 transition-all duration-300 hover:shadow-glow hover:-translate-y-1">
+      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${cor} shadow-lg ${shadow} flex items-center justify-center mb-4`}>
         <Icon className="w-5 h-5 text-white" />
       </div>
       <p className="text-2xl font-bold text-gray-900 dark:text-white leading-tight">{valor}</p>
-      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{titulo}</p>
+      <p className="text-[11px] uppercase tracking-wider font-semibold text-gray-500 dark:text-gray-400 mt-2">{titulo}</p>
     </div>
   )
 }
