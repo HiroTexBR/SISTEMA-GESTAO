@@ -15,7 +15,7 @@ const FORM_INICIAL = {
   tipo_conexao: 'rede' as Impressora['tipo_conexao'],
   endereco_ip: '',
   porta: '9100',
-  largura_papel: 80 as Impressora['largura_papel'],
+  largura_papel: '80mm' as Impressora['largura_papel'],
   corte_automatico: true,
   impressao_automatica: true,
   modo_teste: false,
@@ -158,7 +158,7 @@ export default function ImpressorasPage() {
               </div>
 
               <div className="flex flex-wrap gap-2 mb-5">
-                <Badge label={`${imp.largura_papel}mm`} active />
+                <Badge label={imp.largura_papel} active />
                 <Badge label="Corte Auto" active={imp.corte_automatico} />
                 <Badge label="Imp. Auto" active={imp.impressao_automatica} />
               </div>
@@ -218,11 +218,11 @@ export default function ImpressorasPage() {
                   <label className="block text-sm font-medium mb-1.5">Largura do Papel</label>
                   <select
                     value={form.largura_papel}
-                    onChange={e => setForm(f => ({...f, largura_papel: parseInt(e.target.value) as any}))}
+                    onChange={e => setForm(f => ({...f, largura_papel: e.target.value as Impressora['largura_papel']}))}
                     className="w-full bg-gray-100 dark:bg-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                   >
-                    <option value="80">80mm</option>
-                    <option value="58">58mm</option>
+                    <option value="80mm">80mm</option>
+                    <option value="58mm">58mm</option>
                   </select>
                 </div>
 
