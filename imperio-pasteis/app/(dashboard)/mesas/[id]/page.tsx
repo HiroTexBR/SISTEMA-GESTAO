@@ -99,7 +99,11 @@ export default function ComandaPage() {
       .select()
       .single()
 
-    if (error) { toast.error('Erro ao abrir comanda'); return }
+    if (error) { 
+      toast.error('Erro ao abrir comanda: ' + error.message)
+      console.error(error)
+      return 
+    }
     setComanda(data)
     toast.success('Comanda aberta!')
   }
