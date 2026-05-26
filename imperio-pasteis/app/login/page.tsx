@@ -25,13 +25,8 @@ export default function LoginPage() {
     setLoading(true)
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password: senha })
+      if (error) { toast.error('E-mail ou senha incorretos'); return }
 
-      if (error) {
-        toast.error('E-mail ou senha incorretos')
-        return
-      }
-
-      // Buscar cargo do usuário
       const { data: usuario } = await supabase
         .from('usuarios')
         .select('cargo, nome')
@@ -46,7 +41,6 @@ export default function LoginPage() {
         garcom: '/mesas',
         producao: '/producao',
       }
-
       router.push(redirectMap[usuario?.cargo || 'garcom'])
     } catch {
       toast.error('Erro ao fazer login. Tente novamente.')
@@ -56,42 +50,79 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-bg flex flex-col items-center justify-center p-4">
-      {/* Background Decor */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-brand-accent-glow rounded-full blur-[100px]" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-accent-glow rounded-full blur-[100px] opacity-50" />
+    <div
+      className="min-h-screen flex flex-col items-center justify-center p-5"
+      style={{ backgroundColor: 'var(--color-surface-bg)' }}
+    >
+      {/* Glow de fundo sutil */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div
+          className="absolute top-[-10%] right-[-5%] w-[400px] h-[400px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(249,115,22,0.06) 0%, transparent 70%)' }}
+        />
       </div>
 
-      <div className="relative w-full max-w-sm">
-        {/* Logo and Typography */}
+      <div className="relative w-full max-w-[380px]">
+
+        {/* Logo */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-surface-card shadow-glow mb-6">
-            <UtensilsCrossed className="w-8 h-8 text-brand-accent" />
+          <div
+            className="inline-flex items-center justify-center w-14 h-14 rounded-xl mb-5"
+            style={{ backgroundColor: 'var(--color-brand-accent)' }}
+          >
+            <UtensilsCrossed className="w-7 h-7 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-text-main font-display tracking-tight mb-1">IMPÉRIO</h1>
-          <p className="text-brand-accent text-sm font-bold tracking-[0.2em] uppercase">Alta Gastronomia</p>
+          <h1
+            className="font-display font-bold text-3xl tracking-tight mb-1"
+            style={{ color: 'var(--color-text-main)' }}
+          >
+            IMPÉRIO PASTÉIS
+          </h1>
+          <p
+            className="text-xs font-semibold tracking-[0.18em] uppercase"
+            style={{ color: 'var(--color-brand-accent)' }}
+          >
+            Sistema de Gestão
+          </p>
         </div>
 
-        {/* Login Form */}
-        <div className="glass-card p-8 rounded-[2rem]">
-          <h2 className="text-text-main font-display font-bold text-2xl mb-6 text-center">Acesso ao Sistema</h2>
+        {/* Card de login */}
+        <div
+          className="p-7 rounded-xl"
+          style={{ backgroundColor: 'var(--color-surface-card)', boxShadow: 'var(--shadow-card)' }}
+        >
+          <h2
+            className="font-display font-bold text-lg mb-6"
+            style={{ color: 'var(--color-text-main)' }}
+          >
+            Entrar na conta
+          </h2>
 
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-text-muted text-xs font-bold uppercase tracking-wider mb-2">Credencial</label>
+              <label
+                className="block text-xs font-semibold uppercase tracking-wider mb-1.5"
+                style={{ color: 'var(--color-text-muted)' }}
+              >
+                E-mail
+              </label>
               <input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="seu@email.com"
                 autoComplete="email"
-                className="w-full bg-surface-bg border border-surface-border rounded-xl px-4 py-3 text-text-main placeholder-text-muted/50 focus:outline-none focus:border-brand-accent transition-colors text-sm"
+                className="input"
               />
             </div>
 
             <div>
-              <label className="block text-text-muted text-xs font-bold uppercase tracking-wider mb-2">Chave de Acesso</label>
+              <label
+                className="block text-xs font-semibold uppercase tracking-wider mb-1.5"
+                style={{ color: 'var(--color-text-muted)' }}
+              >
+                Senha
+              </label>
               <div className="relative">
                 <input
                   type={showSenha ? 'text' : 'password'}
@@ -99,12 +130,13 @@ export default function LoginPage() {
                   onChange={e => setSenha(e.target.value)}
                   placeholder="••••••••"
                   autoComplete="current-password"
-                  className="w-full bg-surface-bg border border-surface-border rounded-xl px-4 py-3 pr-12 text-text-main placeholder-text-muted/50 focus:outline-none focus:border-brand-accent transition-colors text-sm"
+                  className="input pr-11"
                 />
                 <button
                   type="button"
                   onClick={() => setShowSenha(!showSenha)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-brand-accent transition-colors p-1"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded transition-colors"
+                  style={{ color: 'var(--color-text-muted)', minHeight: 'unset', minWidth: 'unset' }}
                 >
                   {showSenha ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -114,18 +146,17 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-brand-accent hover:bg-[#D15C39] text-white font-bold py-3.5 rounded-xl transition-all shadow-glow flex items-center justify-center gap-2 mt-4 text-sm"
+              className="btn-primary w-full mt-2"
             >
-              {loading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                'Entrar'
-              )}
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Entrar'}
             </button>
           </form>
         </div>
 
-        <p className="text-center text-text-muted/40 text-xs mt-8">
+        <p
+          className="text-center text-xs mt-8"
+          style={{ color: 'var(--color-text-muted)' }}
+        >
           IMPÉRIO PASTÉIS © {new Date().getFullYear()}
         </p>
       </div>

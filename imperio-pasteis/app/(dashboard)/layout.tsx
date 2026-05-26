@@ -8,7 +8,7 @@ import type { Usuario } from '@/lib/types'
 import {
   LayoutDashboard, UtensilsCrossed, ChefHat, CreditCard, Package,
   Users, BarChart3, Printer, Settings, LogOut, Menu, X,
-  Bell, Sun, Moon, Wifi, WifiOff
+  Sun, Moon, Wifi, WifiOff
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -52,18 +52,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const supabase = createClient()
   const [usuario, setUsuario] = useState<Usuario | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [dark, setDark] = useState(false)
   const [online, setOnline] = useState(true)
 
   useEffect(() => {
-    // Carregar usuário
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) { router.push('/login'); return }
       supabase.from('usuarios').select('*').eq('id', user.id).single()
         .then(({ data }) => setUsuario(data))
     })
 
-    // Online/offline
     const handleOnline = () => { setOnline(true); toast.success('Conexão restaurada') }
     const handleOffline = () => { setOnline(false); toast.error('Sem conexão com a internet') }
     window.addEventListener('online', handleOnline)
@@ -73,10 +70,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       window.removeEventListener('offline', handleOffline)
     }
   }, [])
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', dark)
-  }, [dark])
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -88,149 +81,143 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const bottomItems = BOTTOM_NAV_ITEMS[cargo] || []
 
   return (
-    <div className="flex h-screen bg-surface-bg overflow-hidden">
-      {/* Sidebar — desktop/tablet landscape */}
+    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: 'var(--color-surface-bg)' }}>
+
+      {/* ── SIDEBAR — desktop ── */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-surface-card
-        border-r border-surface-border
-        transform transition-transform duration-300 ease-in-out
-        flex flex-col
+        fixed inset-y-0 left-0 z-50 w-60 flex flex-col
+        transition-transform duration-300 ease-in-out
         lg:relative lg:translate-x-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
+      `} style={{ backgroundColor: 'var(--color-surface-card)', borderRight: '1px solid var(--color-surface-border)' }}>
+
         {/* Logo */}
-        <div className="flex items-center gap-3 p-5 border-b border-surface-border">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/30 flex-shrink-0">
-            <UtensilsCrossed className="w-5 h-5 text-white" />
+        <div className="flex items-center gap-3 px-5 h-16 flex-shrink-0" style={{ borderBottom: '1px solid var(--color-surface-border)' }}>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'var(--color-brand-accent)' }}>
+            <UtensilsCrossed className="w-4 h-4 text-white" />
           </div>
-          <div className="min-w-0">
-            <p className="font-bold text-text-main text-sm leading-tight font-display tracking-tight">IMPÉRIO PASTÉIS</p>
-            <p className="text-xs text-brand-accent truncate capitalize font-medium">{cargo}</p>
+          <div className="min-w-0 flex-1">
+            <p className="font-display font-bold text-sm tracking-tight" style={{ color: 'var(--color-text-main)' }}>IMPÉRIO PASTÉIS</p>
+            <p className="text-xs capitalize font-medium" style={{ color: 'var(--color-brand-accent)' }}>{cargo}</p>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="ml-auto lg:hidden text-text-muted hover:text-text-main p-1"
+            className="lg:hidden p-1 rounded-md"
+            style={{ color: 'var(--color-text-muted)' }}
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+        <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">
           {navItems.map(({ href, icon: Icon, label }) => {
-            const active = pathname === href || pathname.startsWith(href + '/')
+            const active = pathname === href || (href !== '/' && pathname.startsWith(href + '/'))
             return (
               <Link
                 key={href}
                 href={href}
                 onClick={() => setSidebarOpen(false)}
-                className={`
-                  flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
-                  ${active
-                    ? 'bg-brand-accent text-white shadow-lg shadow-brand-accent-glow'
-                    : 'text-text-muted hover:bg-surface-border hover:text-text-main'
-                  }
-                `}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all"
+                style={{
+                  backgroundColor: active ? 'rgba(249,115,22,0.1)' : 'transparent',
+                  color: active ? 'var(--color-brand-accent)' : 'var(--color-text-muted)',
+                }}
               >
-                <Icon className="w-5 h-5 flex-shrink-0" />
+                <Icon className="w-4 h-4 flex-shrink-0" />
                 {label}
               </Link>
             )
           })}
         </nav>
 
-        {/* Footer da sidebar */}
-        <div className="p-3 border-t border-surface-border space-y-2">
+        {/* Footer */}
+        <div className="px-3 pb-4 space-y-1" style={{ borderTop: '1px solid var(--color-surface-border)', paddingTop: '12px' }}>
           {/* Status online */}
-          <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider ${online ? 'text-[#739E82] bg-[#739E82]/10 border border-[#739E82]/20' : 'text-[#D96C6C] bg-[#D96C6C]/10 border border-[#D96C6C]/20'}`}>
-            {online ? <Wifi className="w-4 h-4" /> : <WifiOff className="w-4 h-4" />}
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold"
+            style={{ color: online ? 'var(--color-status-free)' : 'var(--color-status-busy)' }}>
+            {online ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5" />}
             {online ? 'Online' : 'Offline'}
           </div>
 
           {/* Usuário */}
           {usuario && (
-            <div className="flex items-center gap-2 px-3 py-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+            <div className="flex items-center gap-2.5 px-3 py-2">
+              <div className="w-7 h-7 rounded-md flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                style={{ background: 'var(--color-brand-accent)' }}>
                 {usuario.nome[0].toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-text-main truncate">{usuario.nome}</p>
-                <p className="text-[10px] text-text-muted capitalize">{usuario.cargo}</p>
+                <p className="text-xs font-semibold truncate" style={{ color: 'var(--color-text-main)' }}>{usuario.nome}</p>
+                <p className="text-[10px] capitalize" style={{ color: 'var(--color-text-muted)' }}>{usuario.cargo}</p>
               </div>
             </div>
           )}
 
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-500/10 transition-all"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all"
+            style={{ color: 'var(--color-status-busy)' }}
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="w-4 h-4" />
             Sair
           </button>
         </div>
       </aside>
 
-      {/* Overlay da sidebar mobile */}
+      {/* Overlay mobile */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Conteúdo principal */}
+      {/* ── CONTEÚDO PRINCIPAL ── */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header mobile */}
-        <header className="lg:hidden flex items-center gap-3 px-4 py-3 bg-surface-bg/80 backdrop-blur-md border-b border-surface-border flex-shrink-0 z-30 sticky top-0">
+        <header className="lg:hidden flex items-center gap-3 px-4 h-14 flex-shrink-0 z-30 sticky top-0"
+          style={{ backgroundColor: 'var(--color-surface-card)', borderBottom: '1px solid var(--color-surface-border)' }}>
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-2 rounded-lg hover:bg-surface-border text-text-main"
+            className="p-2 rounded-lg"
+            style={{ color: 'var(--color-text-muted)' }}
           >
             <Menu className="w-5 h-5" />
           </button>
 
           <div className="flex items-center gap-2 flex-1">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-              <UtensilsCrossed className="w-3.5 h-3.5 text-white" />
+            <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{ background: 'var(--color-brand-accent)' }}>
+              <UtensilsCrossed className="w-3 h-3 text-white" />
             </div>
-            <span className="font-bold text-text-main text-sm font-display tracking-tight">IMPÉRIO PASTÉIS</span>
+            <span className="font-display font-bold text-sm tracking-tight" style={{ color: 'var(--color-text-main)' }}>IMPÉRIO PASTÉIS</span>
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Status conexão */}
-            <div className={`w-2 h-2 rounded-full ${online ? 'bg-emerald-500' : 'bg-red-500'}`} />
-
-            <button
-              onClick={() => setDark(!dark)}
-              className="p-2 rounded-lg hover:bg-surface-border text-text-muted"
-            >
-              {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: online ? 'var(--color-status-free)' : 'var(--color-status-busy)' }} />
           </div>
         </header>
 
-        {/* Área de conteúdo scrollável */}
-        <main className="flex-1 overflow-y-auto pb-20 lg:pb-6">
+        {/* Conteúdo scrollável */}
+        <main className="flex-1 overflow-y-auto pb-16 lg:pb-0">
           {children}
         </main>
 
-        {/* Bottom Navigation — mobile */}
+        {/* ── BOTTOM NAV — mobile ── */}
         {bottomItems.length > 0 && (
-          <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-surface-bg/80 backdrop-blur-xl border-t border-surface-border safe-bottom z-30">
-            <div className="flex items-center justify-around px-2 py-2">
+          <nav className="lg:hidden fixed bottom-0 inset-x-0 safe-bottom z-30"
+            style={{ backgroundColor: 'var(--color-surface-card)', borderTop: '1px solid var(--color-surface-border)' }}>
+            <div className="flex items-center justify-around px-2 py-1">
               {bottomItems.map(({ href, icon: Icon, label }) => {
-                const active = pathname === href || pathname.startsWith(href + '/')
+                const active = pathname === href || (href !== '/' && pathname.startsWith(href + '/'))
                 return (
                   <Link
                     key={href}
                     href={href}
-                    className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all min-w-[56px] ${
-                      active
-                        ? 'text-brand-accent'
-                        : 'text-text-muted'
-                    }`}
+                    className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg transition-all min-w-[52px]"
+                    style={{ color: active ? 'var(--color-brand-accent)' : 'var(--color-text-muted)' }}
                   >
-                    <Icon className={`w-6 h-6 ${active ? 'scale-110' : ''} transition-transform`} />
+                    <Icon className={`w-5 h-5 transition-transform ${active ? 'scale-110' : ''}`} />
                     <span className="text-[10px] font-medium leading-tight">{label}</span>
                   </Link>
                 )
