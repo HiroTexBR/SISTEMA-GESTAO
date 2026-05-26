@@ -1,0 +1,167 @@
+@import "tailwindcss";
+
+:root {
+  --primary: 24 100% 50%;
+  --primary-foreground: 0 0% 100%;
+
+  --background: 0 0% 98%;
+  --foreground: 224 71% 4%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 224 71% 4%;
+
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+
+  --muted: 220 14% 96%;
+  --muted-foreground: 220 9% 46%;
+
+  --accent: 220 14% 96%;
+  --accent-foreground: 224 71% 4%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --ring: 24 100% 50%;
+  --radius: 0.75rem;
+
+  /* Cores de status */
+  --status-livre: 142 76% 36%;
+  --status-ocupada: 0 84% 60%;
+  --status-aguardando: 38 92% 50%;
+  --status-preparo: 217 91% 60%;
+  --status-inativa: 220 9% 46%;
+}
+
+.dark {
+  --background: 224 71% 4%;
+  --foreground: 213 31% 91%;
+
+  --card: 224 71% 8%;
+  --card-foreground: 213 31% 91%;
+
+  --border: 216 34% 17%;
+  --input: 216 34% 17%;
+
+  --muted: 216 34% 17%;
+  --muted-foreground: 215 20% 65%;
+
+  --accent: 216 34% 17%;
+  --accent-foreground: 213 31% 91%;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+/* Scrollbar customizada */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 9999px;
+}
+
+/* Animações */
+@keyframes pulse-orange {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(24 100% 50% / 0.4); }
+  50% { box-shadow: 0 0 0 8px hsl(24 100% 50% / 0); }
+}
+
+@keyframes slide-in-bottom {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-pulse-orange { animation: pulse-orange 2s infinite; }
+.animate-slide-in { animation: slide-in-bottom 0.3s ease-out; }
+.animate-fade-in { animation: fade-in 0.2s ease-out; }
+
+/* Skeleton loading */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 25%,
+    hsl(var(--accent)) 50%,
+    hsl(var(--muted)) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Touch targets mínimos */
+button, a, [role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Bottom navigation safe area */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+/* Prevent text selection in UI elements */
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Status badge cores */
+.badge-livre { background-color: hsl(142 76% 36%); color: white; }
+.badge-ocupada { background-color: hsl(0 84% 60%); color: white; }
+.badge-aguardando { background-color: hsl(38 92% 50%); color: white; }
+.badge-preparo { background-color: hsl(217 91% 60%); color: white; }
+.badge-inativa { background-color: hsl(220 9% 46%); color: white; }
+
+/* Card de mesa */
+.mesa-card {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.mesa-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -4px rgba(0,0,0,0.15);
+}
+.mesa-card:active {
+  transform: translateY(0);
+}
+
+/* Pedido atrasado */
+.pedido-atrasado {
+  border-color: hsl(0 84% 60%);
+  animation: pulse-orange 2s infinite;
+}
+
+/* Print styles */
+@media print {
+  .no-print { display: none !important; }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "Império Pastéis - Comandas",
+  "short_name": "Império",
+  "description": "Sistema de comandas digitais e produção",
+  "start_url": "/login",
+  "display": "standalone",
+  "background_color": "#030712",
+  "theme_color": "#f97316",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
