@@ -104,8 +104,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <UtensilsCrossed className="w-5 h-5 text-white" />
           </div>
           <div className="min-w-0">
-            <p className="font-bold text-text-main text-sm leading-tight font-[Fraunces]">IMPÉRIO PASTÉIS</p>
-            <p className="text-xs text-brand-accent truncate capitalize">{cargo}</p>
+            <p className="font-bold text-text-main text-sm leading-tight font-display tracking-tight">IMPÉRIO PASTÉIS</p>
+            <p className="text-xs text-brand-accent truncate capitalize font-medium">{cargo}</p>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
@@ -193,7 +193,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
               <UtensilsCrossed className="w-3.5 h-3.5 text-white" />
             </div>
-            <span className="font-bold text-text-main text-sm font-[Fraunces]">IMPÉRIO PASTÉIS</span>
+            <span className="font-bold text-text-main text-sm font-display tracking-tight">IMPÉRIO PASTÉIS</span>
           </div>
 
           <div className="flex items-center gap-2">

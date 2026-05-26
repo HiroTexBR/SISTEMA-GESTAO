@@ -2,26 +2,26 @@
 
 @theme {
   /* Fonts */
-  --font-sans: var(--font-sans), 'system-ui', sans-serif;
-  --font-serif: var(--font-serif), 'Georgia', serif;
+  --font-sans: var(--font-sans), 'Inter', sans-serif;
+  --font-display: var(--font-display), 'Outfit', sans-serif;
 
-  /* Luxury Bakery Colors */
-  --color-surface-bg: #110F0D;
-  --color-surface-card: #1A1715;
-  --color-surface-card-hover: #26211E;
-  --color-surface-border: #26211E;
+  /* SaaS Premium Dark Mode */
+  --color-surface-bg: #09090B;
+  --color-surface-card: #18181B;
+  --color-surface-card-hover: #27272A;
+  --color-surface-border: #27272A;
   
-  --color-brand-accent: #E86D48;
-  --color-brand-accent-glow: rgba(232, 109, 72, 0.3);
+  --color-brand-accent: #F97316;
+  --color-brand-accent-glow: rgba(249, 115, 22, 0.2);
   
-  --color-text-main: #F4EFEB;
-  --color-text-muted: #A3968B;
+  --color-text-main: #FAFAFA;
+  --color-text-muted: #A1A1AA;
   
-  --color-status-free: #739E82;
-  --color-status-busy: #D96C6C;
-  --color-status-wait: #D4A373;
-  --color-status-prep: #7592B8;
-  --color-status-inactive: #4A4643;
+  --color-status-free: #10B981;
+  --color-status-busy: #EF4444;
+  --color-status-wait: #F59E0B;
+  --color-status-prep: #3B82F6;
+  --color-status-inactive: #52525B;
 
   --shadow-glow: 0 0 20px -5px var(--color-brand-accent-glow);
 }
@@ -54,11 +54,11 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
 
-/* Solid Cards (Corrigindo o bug de transparência) */
+/* Premium SaaS Cards */
 .glass-card {
   background-color: var(--color-surface-card);
-  box-shadow: 0 8px 30px -4px rgba(0,0,0,0.5);
-  transition: background-color 0.2s ease;
+  box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
+  transition: all 0.2s ease;
 }
 
 .glass-card:hover {
@@ -66,11 +66,11 @@ body {
 }
 
 /* Status Badges */
-.badge-livre { background-color: rgba(115, 158, 130, 0.15); color: var(--color-status-free); }
-.badge-ocupada { background-color: rgba(217, 108, 108, 0.15); color: var(--color-status-busy); }
-.badge-aguardando { background-color: rgba(212, 163, 115, 0.15); color: var(--color-status-wait); }
-.badge-preparo { background-color: rgba(117, 146, 184, 0.15); color: var(--color-status-prep); }
-.badge-inativa { background-color: rgba(74, 70, 67, 0.15); color: var(--color-status-inactive); }
+.badge-livre { background-color: rgba(16, 185, 129, 0.15); color: var(--color-status-free); }
+.badge-ocupada { background-color: rgba(239, 68, 68, 0.15); color: var(--color-status-busy); }
+.badge-aguardando { background-color: rgba(245, 158, 11, 0.15); color: var(--color-status-wait); }
+.badge-preparo { background-color: rgba(59, 130, 246, 0.15); color: var(--color-status-prep); }
+.badge-inativa { background-color: rgba(82, 82, 91, 0.15); color: var(--color-status-inactive); }
 
 /* Animações */
 @keyframes pulse-warm {
