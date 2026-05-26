@@ -20,7 +20,17 @@ const FORMAS_PAGAMENTO = [
   { id: 'misto', label: 'Misto', icon: Calculator, cor: 'from-orange-500 to-orange-600' },
 ]
 
+import { Suspense } from 'react'
+
 export default function CaixaPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center p-8"><Loader2 className="w-8 h-8 animate-spin text-emerald-500" /></div>}>
+      <CaixaContent />
+    </Suspense>
+  )
+}
+
+function CaixaContent() {
   const searchParams = useSearchParams()
   const supabase = createClient()
 

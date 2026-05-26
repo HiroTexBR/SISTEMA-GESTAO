@@ -167,7 +167,7 @@ export default function DashboardPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="hora" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `R$${v}`} />
-                <Tooltip formatter={(v: number) => formatCurrency(v)} />
+                <Tooltip formatter={(v: any) => formatCurrency(v as number)} />
                 <Area type="monotone" dataKey="total" stroke="#f97316" fill="url(#gradOrange)" strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
