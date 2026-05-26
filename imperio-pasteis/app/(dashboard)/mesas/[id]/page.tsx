@@ -103,7 +103,7 @@ export default function ComandaPage() {
         nome: user.email?.split('@')[0] || 'Usuário',
         email: user.email,
         cargo: 'admin',
-        status: 'ativo'
+        ativo: true
       })
       if (insertUserError) {
         toast.error('Erro no auto-reparo do usuário: ' + insertUserError.message)

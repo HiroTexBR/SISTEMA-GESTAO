@@ -12,7 +12,7 @@ type Usuario = {
   nome: string
   email: string
   cargo: 'admin' | 'caixa' | 'garcom' | 'producao'
-  status: 'ativo' | 'inativo'
+  ativo: boolean
   criado_em: string
 }
 
@@ -21,7 +21,7 @@ const FORM_INICIAL = {
   email: '',
   senha: '',
   cargo: 'garcom' as Usuario['cargo'],
-  status: 'ativo' as Usuario['status']
+  ativo: true
 }
 
 export default function FuncionariosPage() {
@@ -62,7 +62,7 @@ export default function FuncionariosPage() {
       email: u.email,
       senha: '', // Não carrega senha
       cargo: u.cargo,
-      status: u.status
+      ativo: u.ativo
     })
     setShowForm(true)
   }
@@ -82,7 +82,7 @@ export default function FuncionariosPage() {
           .update({
             nome: form.nome,
             cargo: form.cargo,
-            status: form.status
+            ativo: form.ativo
           })
           .eq('id', editando.id)
 
@@ -122,7 +122,7 @@ export default function FuncionariosPage() {
             nome: form.nome,
             email: form.email,
             cargo: form.cargo,
-            status: form.status
+            ativo: form.ativo
           }).select()
         }
 
@@ -168,7 +168,7 @@ export default function FuncionariosPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {usuarios.map(u => (
-            <div key={u.id} className={`glass-card rounded-[2rem] p-6 transition-all duration-300 hover:shadow-glow hover:-translate-y-1 ${u.status === 'ativo' ? 'opacity-100' : 'opacity-50 grayscale'}`}>
+            <div key={u.id} className={`glass-card rounded-[2rem] p-6 transition-all duration-300 hover:shadow-glow hover:-translate-y-1 ${u.ativo ? 'opacity-100' : 'opacity-50 grayscale'}`}>
               <div className="flex justify-between items-start mb-5">
                 <div className="w-12 h-12 bg-surface-bg border border-surface-border rounded-xl flex items-center justify-center shadow-inner">
                   <Users className="w-6 h-6 text-text-muted" />
@@ -182,8 +182,8 @@ export default function FuncionariosPage() {
               <p className="text-xs text-text-muted font-medium truncate mb-5">{u.email}</p>
 
               <div className="flex items-center justify-between pt-4 border-t border-surface-border mt-4">
-                <span className={`text-[10px] uppercase tracking-wider font-bold px-3 py-1.5 rounded-lg ${u.status === 'ativo' ? 'bg-[#739E82]/10 text-[#739E82] border border-[#739E82]/20' : 'bg-[#D96C6C]/10 text-[#D96C6C] border border-[#D96C6C]/20'}`}>
-                  {u.status}
+                <span className={`text-[10px] uppercase tracking-wider font-bold px-3 py-1.5 rounded-lg ${u.ativo ? 'bg-[#739E82]/10 text-[#739E82] border border-[#739E82]/20' : 'bg-[#D96C6C]/10 text-[#D96C6C] border border-[#D96C6C]/20'}`}>
+                  {u.ativo ? 'Ativo' : 'Inativo'}
                 </span>
                 
                 <button
@@ -265,8 +265,8 @@ export default function FuncionariosPage() {
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Status</label>
                   <select
-                    value={form.status}
-                    onChange={e => setForm(f => ({...f, status: e.target.value as any}))}
+                    value={form.ativo ? 'ativo' : 'inativo'}
+                    onChange={e => setForm(f => ({...f, ativo: e.target.value === 'ativo'}))}
                     className="w-full bg-surface-bg border border-surface-border rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-brand-accent transition-colors"
                   >
                     <option value="ativo">Ativo</option>
