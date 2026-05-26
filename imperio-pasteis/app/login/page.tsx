@@ -4,14 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
-import { UtensilsCrossed, Eye, EyeOff, Loader2, ChefHat, ShoppingBag, CreditCard, User } from 'lucide-react'
-
-const CARGOS = [
-  { id: 'garcom', label: 'Garçom', icon: User, cor: 'from-blue-500 to-blue-600', desc: 'Atendimento às mesas' },
-  { id: 'producao', label: 'Produção', icon: ChefHat, cor: 'from-amber-500 to-orange-500', desc: 'Cozinha e preparo' },
-  { id: 'caixa', label: 'Caixa', icon: CreditCard, cor: 'from-emerald-500 to-green-600', desc: 'Pagamentos' },
-  { id: 'admin', label: 'Admin', icon: ShoppingBag, cor: 'from-purple-500 to-violet-600', desc: 'Administração total' },
-]
+import { UtensilsCrossed, Eye, EyeOff, Loader2 } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -63,60 +56,42 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-950 via-orange-900 to-orange-800 flex flex-col items-center justify-center p-4">
-      {/* Partículas decorativas */}
+    <div className="min-h-screen bg-surface-bg flex flex-col items-center justify-center p-4">
+      {/* Background Decor */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-400/10 rounded-full blur-3xl" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-brand-accent-glow rounded-full blur-[100px]" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-accent-glow rounded-full blur-[100px] opacity-50" />
       </div>
 
-      <div className="relative w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 shadow-2xl shadow-orange-500/40 mb-4">
-            <UtensilsCrossed className="w-10 h-10 text-white" />
+      <div className="relative w-full max-w-sm">
+        {/* Logo and Typography */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-surface-card border border-surface-border shadow-glow mb-6">
+            <UtensilsCrossed className="w-8 h-8 text-brand-accent" />
           </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">IMPÉRIO</h1>
-          <p className="text-orange-200 text-lg font-medium tracking-widest uppercase">Pastéis</p>
-          <p className="text-orange-300/60 text-sm mt-1">Sistema de Comandas Digital</p>
+          <h1 className="text-4xl font-bold text-text-main font-[Fraunces] tracking-tight mb-1">IMPÉRIO</h1>
+          <p className="text-brand-accent text-sm font-bold tracking-[0.2em] uppercase">Alta Gastronomia</p>
         </div>
 
-        {/* Card de login */}
-        <div className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 p-8 shadow-2xl">
-          <h2 className="text-white font-semibold text-xl mb-6 text-center">Acesse sua conta</h2>
+        {/* Login Form */}
+        <div className="glass-card p-8 rounded-[2rem]">
+          <h2 className="text-text-main font-[Fraunces] font-bold text-2xl mb-6 text-center">Acesso ao Sistema</h2>
 
-          {/* Cards de cargo (informativo) */}
-          <div className="grid grid-cols-4 gap-2 mb-6">
-            {CARGOS.map(({ id, label, icon: Icon, cor }) => (
-              <div
-                key={id}
-                className="flex flex-col items-center gap-1 p-2 rounded-xl bg-white/5 border border-white/10"
-              >
-                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${cor} flex items-center justify-center`}>
-                  <Icon className="w-4 h-4 text-white" />
-                </div>
-                <span className="text-white/70 text-[10px] font-medium text-center leading-tight">{label}</span>
-              </div>
-            ))}
-          </div>
-
-          <form onSubmit={handleLogin} className="space-y-4">
-            {/* E-mail */}
+          <form onSubmit={handleLogin} className="space-y-5">
             <div>
-              <label className="block text-orange-100 text-sm font-medium mb-2">E-mail</label>
+              <label className="block text-text-muted text-xs font-bold uppercase tracking-wider mb-2">Credencial</label>
               <input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="seu@email.com"
                 autoComplete="email"
-                className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all text-base"
+                className="w-full bg-surface-bg border border-surface-border rounded-xl px-4 py-3 text-text-main placeholder-text-muted/50 focus:outline-none focus:border-brand-accent transition-colors text-sm"
               />
             </div>
 
-            {/* Senha */}
             <div>
-              <label className="block text-orange-100 text-sm font-medium mb-2">Senha</label>
+              <label className="block text-text-muted text-xs font-bold uppercase tracking-wider mb-2">Chave de Acesso</label>
               <div className="relative">
                 <input
                   type={showSenha ? 'text' : 'password'}
@@ -124,38 +99,34 @@ export default function LoginPage() {
                   onChange={e => setSenha(e.target.value)}
                   placeholder="••••••••"
                   autoComplete="current-password"
-                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 pr-12 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all text-base"
+                  className="w-full bg-surface-bg border border-surface-border rounded-xl px-4 py-3 pr-12 text-text-main placeholder-text-muted/50 focus:outline-none focus:border-brand-accent transition-colors text-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setShowSenha(!showSenha)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors p-1"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-brand-accent transition-colors p-1"
                 >
-                  {showSenha ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showSenha ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
-            {/* Botão entrar */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 active:scale-[0.98] text-white font-bold py-4 rounded-xl transition-all duration-200 shadow-lg shadow-orange-500/30 flex items-center justify-center gap-3 text-lg mt-2"
+              className="w-full bg-brand-accent hover:bg-[#D15C39] text-white font-bold py-3.5 rounded-xl transition-all shadow-glow flex items-center justify-center gap-2 mt-4 text-sm"
             >
               {loading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Entrando...
-                </>
+                <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                'Entrar no Sistema'
+                'Entrar'
               )}
             </button>
           </form>
         </div>
 
-        <p className="text-center text-orange-400/50 text-sm mt-6">
-          v1.0.0 · IMPÉRIO PASTÉIS © {new Date().getFullYear()}
+        <p className="text-center text-text-muted/40 text-xs mt-8">
+          IMPÉRIO PASTÉIS © {new Date().getFullYear()}
         </p>
       </div>
     </div>

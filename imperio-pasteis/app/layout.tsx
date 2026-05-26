@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from 'next'
-import { Epilogue } from 'next/font/google'
+import { Plus_Jakarta_Sans, Fraunces } from 'next/font/google'
 import './globals.css'
 import { Toaster } from 'sonner'
 
-const font = Epilogue({ subsets: ['latin'], variable: '--font-sans' })
+const fontSans = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-sans' })
+const fontSerif = Fraunces({ subsets: ['latin'], variable: '--font-serif', axes: ['opsz', 'SOFT', 'WONK'] })
 
 export const metadata: Metadata = {
   title: 'IMPÉRIO PASTÉIS — Sistema de Comandas',
@@ -36,7 +37,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
-      <body className={`${font.variable} font-sans antialiased`}>
+      <body className={`${fontSans.variable} ${fontSerif.variable} font-sans antialiased bg-surface-bg text-text-main selection:bg-brand-accent selection:text-white`}>
         {children}
         <Toaster
           position="top-center"

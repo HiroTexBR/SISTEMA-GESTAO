@@ -1,41 +1,32 @@
 @import "tailwindcss";
 
 @theme {
+  /* Fonts */
   --font-sans: var(--font-sans), 'system-ui', sans-serif;
+  --font-serif: var(--font-serif), 'Georgia', serif;
+
+  /* Luxury Bakery Colors */
+  --color-surface-bg: #110F0D;
+  --color-surface-card: #1A1715;
+  --color-surface-card-hover: #26211E;
+  --color-surface-border: #26211E;
   
-  --shadow-glow: 0 0 20px -5px var(--tw-shadow-color);
-  --shadow-glow-lg: 0 0 30px -5px var(--tw-shadow-color);
+  --color-brand-accent: #E86D48;
+  --color-brand-accent-glow: rgba(232, 109, 72, 0.3);
+  
+  --color-text-main: #F4EFEB;
+  --color-text-muted: #A3968B;
+  
+  --color-status-free: #739E82;
+  --color-status-busy: #D96C6C;
+  --color-status-wait: #D4A373;
+  --color-status-prep: #7592B8;
+  --color-status-inactive: #4A4643;
+
+  --shadow-glow: 0 0 20px -5px var(--color-brand-accent-glow);
 }
 
-:root {
-  --background: 30 15% 98%; /* #fbf9f8 - creme claro */
-  --foreground: 20 20% 15%; /* #2b2523 - trufa */
-
-  /* Cores de status suaves (Light) */
-  --status-livre: 150 60% 40%;
-  --status-ocupada: 5 70% 55%;
-  --status-aguardando: 35 90% 50%;
-  --status-preparo: 210 80% 55%;
-  --status-inativa: 20 10% 60%;
-}
-
-.dark {
-  --background: 20 8% 7%;  /* #131110 - Expresso profundo */
-  --foreground: 30 20% 95%; /* #f5f0e6 - Creme suave */
-
-  --card: 20 7% 11%; /* #1d1a19 - Trufa quente */
-  --border: 20 6% 16%; /* #2b2725 - Bordas sutis */
-
-  --muted-foreground: 30 10% 65%; /* #ada6a1 */
-
-  /* Status na dark mode são quentes e adaptados */
-  --status-livre: 150 40% 45%; 
-  --status-ocupada: 5 60% 50%;
-  --status-aguardando: 35 80% 50%;
-  --status-preparo: 210 60% 55%;
-  --status-inativa: 20 6% 35%;
-}
-
+/* Base resets */
 * {
   box-sizing: border-box;
   padding: 0;
@@ -49,9 +40,8 @@ html, body {
 }
 
 body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-  font-feature-settings: "rlig" 1, "calt" 1;
+  background-color: var(--color-surface-bg);
+  color: var(--color-text-main);
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
 }
 
@@ -59,15 +49,35 @@ body {
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--border));
+  background: var(--color-surface-border);
   border-radius: 9999px;
 }
-::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground)); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
 
-/* Animações refinadas */
+/* Solid Cards (Corrigindo o bug de transparência) */
+.glass-card {
+  background-color: var(--color-surface-card);
+  border: 1px solid rgba(244, 239, 235, 0.05); /* Brilho super sutil na borda */
+  box-shadow: 0 8px 30px -4px rgba(0,0,0,0.5);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.glass-card:hover {
+  background-color: var(--color-surface-card-hover);
+  border-color: rgba(244, 239, 235, 0.1);
+}
+
+/* Status Badges */
+.badge-livre { background-color: rgba(115, 158, 130, 0.15); color: var(--color-status-free); }
+.badge-ocupada { background-color: rgba(217, 108, 108, 0.15); color: var(--color-status-busy); }
+.badge-aguardando { background-color: rgba(212, 163, 115, 0.15); color: var(--color-status-wait); }
+.badge-preparo { background-color: rgba(117, 146, 184, 0.15); color: var(--color-status-prep); }
+.badge-inativa { background-color: rgba(74, 70, 67, 0.15); color: var(--color-status-inactive); }
+
+/* Animações */
 @keyframes pulse-warm {
-  0%, 100% { box-shadow: 0 0 0 0 hsl(35 80% 50% / 0.3); }
-  50% { box-shadow: 0 0 0 6px hsl(35 80% 50% / 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(232, 109, 72, 0.3); }
+  50% { box-shadow: 0 0 0 6px rgba(232, 109, 72, 0); }
 }
 
 @keyframes slide-in-bottom {
@@ -84,7 +94,7 @@ body {
 .animate-slide-in { animation: slide-in-bottom 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .animate-fade-in { animation: fade-in 0.4s ease-out; }
 
-/* Skeleton loading */
+/* Skeleton */
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
@@ -93,41 +103,15 @@ body {
 .skeleton {
   background: linear-gradient(
     90deg,
-    hsl(var(--border)) 25%,
-    hsl(var(--border) / 0.5) 50%,
-    hsl(var(--border)) 75%
+    var(--color-surface-card) 25%,
+    var(--color-surface-card-hover) 50%,
+    var(--color-surface-card) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
 
-/* Touch targets mínimos */
-button, a, [role="button"] { min-height: 44px; min-width: 44px; }
+/* Utilitários Extras */
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 16px); }
 .no-select { user-select: none; }
-
-/* Componentes Premium (Gourmet Cards) */
-.glass-card {
-  background: hsl(var(--card));
-  border: 1px solid hsl(var(--border));
-  box-shadow: 0 4px 20px -2px rgba(0,0,0,0.1);
-}
-
-.dark .glass-card {
-  background: rgba(29, 26, 25, 0.6); /* Trufa quente translúcido */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 240, 0.03); /* Brilho super sutil */
-  box-shadow: 0 8px 30px -4px rgba(0,0,0,0.3);
-}
-
-/* Status dots and badges */
-.badge-livre { background-color: hsl(var(--status-livre) / 0.1); color: hsl(var(--status-livre)); }
-.badge-ocupada { background-color: hsl(var(--status-ocupada) / 0.1); color: hsl(var(--status-ocupada)); }
-.badge-aguardando { background-color: hsl(var(--status-aguardando) / 0.1); color: hsl(var(--status-aguardando)); }
-.badge-preparo { background-color: hsl(var(--status-preparo) / 0.1); color: hsl(var(--status-preparo)); }
-.badge-inativa { background-color: hsl(var(--status-inativa) / 0.1); color: hsl(var(--status-inativa)); }
-
-@media print {
-  .no-print { display: none !important; }
-}
+button, a, [role="button"] { min-height: 44px; min-width: 44px; }

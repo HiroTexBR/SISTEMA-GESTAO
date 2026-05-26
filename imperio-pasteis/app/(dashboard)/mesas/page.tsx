@@ -91,28 +91,28 @@ export default function MesasPage() {
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Mesas</h1>
-          <p className="text-sm text-gray-500">{stats.livres} livres · {stats.ocupadas} ocupadas</p>
+          <h1 className="text-3xl font-bold font-[Fraunces] text-text-main">Mesas</h1>
+          <p className="text-sm text-text-muted mt-1">{stats.livres} livres · {stats.ocupadas} ocupadas</p>
         </div>
         <button
           onClick={carregarMesas}
-          className="p-2.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 hover:text-orange-500 transition-all"
+          className="p-3 rounded-xl bg-surface-bg border border-surface-border text-text-muted hover:text-brand-accent transition-colors"
         >
           <RefreshCw className="w-5 h-5" />
         </button>
       </div>
 
       {/* Stats rápidos */}
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-4 gap-3">
         {[
-          { label: 'Total', value: stats.total, cor: 'text-gray-900 dark:text-gray-100' },
-          { label: 'Livres', value: stats.livres, cor: 'text-emerald-600 dark:text-emerald-400' },
-          { label: 'Ocupadas', value: stats.ocupadas, cor: 'text-red-600 dark:text-red-400' },
-          { label: 'Pagamento', value: stats.aguardando, cor: 'text-amber-600 dark:text-amber-400' },
+          { label: 'Total', value: stats.total, cor: 'text-text-main' },
+          { label: 'Livres', value: stats.livres, cor: 'text-[#739E82]' },
+          { label: 'Ocupadas', value: stats.ocupadas, cor: 'text-[#D96C6C]' },
+          { label: 'Pagamento', value: stats.aguardando, cor: 'text-[#D4A373]' },
         ].map(s => (
-          <div key={s.label} className={`glass-card rounded-3xl px-3 py-3 sm:px-4 sm:py-4 text-center transition-all hover:-translate-y-1 ${s.cor}`}>
-            <p className="text-2xl lg:text-3xl font-black leading-none mb-1">{s.value}</p>
-            <p className="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold opacity-60">{s.label}</p>
+          <div key={s.label} className={`glass-card rounded-2xl px-4 py-4 text-center transition-all hover:-translate-y-1 ${s.cor}`}>
+            <p className="text-3xl lg:text-4xl font-[Fraunces] font-bold leading-none mb-1">{s.value}</p>
+            <p className="text-[10px] uppercase tracking-widest font-bold opacity-70 mt-2">{s.label}</p>
           </div>
         ))}
       </div>
@@ -120,13 +120,13 @@ export default function MesasPage() {
       {/* Busca e filtros */}
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
             <input
               type="text"
               placeholder="Buscar mesa..."
               value={busca}
               onChange={e => setBusca(e.target.value)}
-              className="w-full glass-card border border-gray-200 dark:border-white/10 rounded-full pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all text-gray-900 dark:text-white placeholder:text-gray-400"
+              className="w-full glass-card border border-surface-border rounded-xl pl-12 pr-4 py-3.5 text-sm focus:outline-none focus:border-brand-accent transition-colors text-text-main placeholder:text-text-muted/50"
             />
         </div>
       </div>
@@ -137,10 +137,10 @@ export default function MesasPage() {
           <button
             key={s}
             onClick={() => setFiltroStatus(s)}
-            className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${
+            className={`px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all flex-shrink-0 ${
               filtroStatus === s
-                ? 'bg-orange-500 text-white shadow-glow'
-                : 'glass-card text-gray-600 dark:text-gray-300 hover:-translate-y-0.5'
+                ? 'bg-brand-accent text-white shadow-glow'
+                : 'bg-surface-bg border border-surface-border text-text-muted hover:text-text-main hover:-translate-y-0.5'
             }`}
           >
             {s === 'todos' ? 'Todos' : getStatusMesaLabel(s)}
@@ -180,37 +180,37 @@ function MesaCard({ mesa, onClick }: { mesa: Mesa & { comanda?: Comanda }, onCli
     >
       <div className="p-5">
         {/* Número da mesa */}
-        <div className="flex items-start justify-between mb-3">
+        <div className="flex items-start justify-between mb-4">
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Mesa</p>
-            <p className="text-3xl font-black text-gray-900 dark:text-white leading-none">{mesa.numero}</p>
+            <p className="text-[10px] text-text-muted font-bold uppercase tracking-[0.2em] mb-1">Mesa</p>
+            <p className="text-4xl font-[Fraunces] font-bold text-text-main leading-none">{mesa.numero}</p>
           </div>
           <StatusDot status={mesa.status} />
         </div>
 
         {/* Info da comanda */}
         {temComanda ? (
-          <div className="space-y-1.5">
+          <div className="space-y-2 mt-4 pt-4 border-t border-surface-border">
             {mesa.comanda?.garcom && (
-              <div className="flex items-center gap-1.5 text-xs text-gray-500">
+              <div className="flex items-center gap-2 text-xs text-text-muted">
                 <Users className="w-3.5 h-3.5 flex-shrink-0" />
                 <span className="truncate">{(mesa.comanda.garcom as any).nome}</span>
               </div>
             )}
             {mesa.comanda?.aberta_em && (
-              <div className="flex items-center gap-1.5 text-xs text-gray-500">
+              <div className="flex items-center gap-2 text-xs text-text-muted">
                 <Clock className="w-3.5 h-3.5 flex-shrink-0" />
                 <span>{formatTime(mesa.comanda.aberta_em)}</span>
               </div>
             )}
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-orange-600 dark:text-orange-400">
-              <Receipt className="w-3.5 h-3.5 flex-shrink-0" />
+            <div className="flex items-center gap-2 text-sm font-bold text-brand-accent mt-2">
+              <Receipt className="w-4 h-4 flex-shrink-0" />
               <span>{formatCurrency(mesa.comanda?.total || 0)}</span>
             </div>
           </div>
         ) : (
-          <div className="flex items-center mt-3">
-            <span className={`text-xs font-bold px-3 py-1.5 rounded-full ${
+          <div className="flex items-center mt-4 pt-4 border-t border-surface-border">
+            <span className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg ${
               mesa.status === 'livre' ? 'badge-livre' :
               mesa.status === 'inativa' ? 'badge-inativa' : 'badge-preparo'
             }`}>

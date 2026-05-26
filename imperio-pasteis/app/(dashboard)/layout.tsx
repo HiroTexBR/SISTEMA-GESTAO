@@ -88,28 +88,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const bottomItems = BOTTOM_NAV_ITEMS[cargo] || []
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-[#09090b] overflow-hidden">
+    <div className="flex h-screen bg-surface-bg overflow-hidden">
       {/* Sidebar — desktop/tablet landscape */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-[#09090b]
-        border-r border-gray-200 dark:border-white/5
+        fixed inset-y-0 left-0 z-50 w-64 bg-surface-card
+        border-r border-surface-border
         transform transition-transform duration-300 ease-in-out
         flex flex-col
         lg:relative lg:translate-x-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Logo */}
-        <div className="flex items-center gap-3 p-5 border-b border-gray-100 dark:border-white/5">
+        <div className="flex items-center gap-3 p-5 border-b border-surface-border">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/30 flex-shrink-0">
             <UtensilsCrossed className="w-5 h-5 text-white" />
           </div>
           <div className="min-w-0">
-            <p className="font-bold text-gray-900 dark:text-white text-sm leading-tight">IMPÉRIO PASTÉIS</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate capitalize">{cargo}</p>
+            <p className="font-bold text-text-main text-sm leading-tight font-[Fraunces]">IMPÉRIO PASTÉIS</p>
+            <p className="text-xs text-brand-accent truncate capitalize">{cargo}</p>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="ml-auto lg:hidden text-gray-400 hover:text-gray-600 p-1"
+            className="ml-auto lg:hidden text-text-muted hover:text-text-main p-1"
           >
             <X className="w-5 h-5" />
           </button>
@@ -127,8 +127,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 className={`
                   flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
                   ${active
-                    ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/25'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'
+                    ? 'bg-brand-accent text-white shadow-lg shadow-brand-accent-glow'
+                    : 'text-text-muted hover:bg-surface-border hover:text-text-main'
                   }
                 `}
               >
@@ -140,9 +140,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </nav>
 
         {/* Footer da sidebar */}
-        <div className="p-3 border-t border-gray-100 dark:border-white/5 space-y-2">
+        <div className="p-3 border-t border-surface-border space-y-2">
           {/* Status online */}
-          <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium ${online ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 dark:text-emerald-400' : 'text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-400'}`}>
+          <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider ${online ? 'text-[#739E82] bg-[#739E82]/10 border border-[#739E82]/20' : 'text-[#D96C6C] bg-[#D96C6C]/10 border border-[#D96C6C]/20'}`}>
             {online ? <Wifi className="w-4 h-4" /> : <WifiOff className="w-4 h-4" />}
             {online ? 'Online' : 'Offline'}
           </div>
@@ -154,15 +154,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {usuario.nome[0].toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-gray-900 dark:text-white truncate">{usuario.nome}</p>
-                <p className="text-[10px] text-gray-500 capitalize">{usuario.cargo}</p>
+                <p className="text-xs font-semibold text-text-main truncate">{usuario.nome}</p>
+                <p className="text-[10px] text-text-muted capitalize">{usuario.cargo}</p>
               </div>
             </div>
           )}
 
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-500/10 transition-all"
           >
             <LogOut className="w-5 h-5" />
             Sair
@@ -181,10 +181,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Conteúdo principal */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header mobile */}
-        <header className="lg:hidden flex items-center gap-3 px-4 py-3 bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-md border-b border-gray-200 dark:border-white/5 flex-shrink-0 z-30 sticky top-0">
+        <header className="lg:hidden flex items-center gap-3 px-4 py-3 bg-surface-bg/80 backdrop-blur-md border-b border-surface-border flex-shrink-0 z-30 sticky top-0">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
+            className="p-2 rounded-lg hover:bg-surface-border text-text-main"
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -193,17 +193,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
               <UtensilsCrossed className="w-3.5 h-3.5 text-white" />
             </div>
-            <span className="font-bold text-gray-900 dark:text-white text-sm">IMPÉRIO PASTÉIS</span>
+            <span className="font-bold text-text-main text-sm font-[Fraunces]">IMPÉRIO PASTÉIS</span>
           </div>
 
           <div className="flex items-center gap-2">
             {/* Status conexão */}
             <div className={`w-2 h-2 rounded-full ${online ? 'bg-emerald-500' : 'bg-red-500'}`} />
 
-            {/* Dark mode */}
             <button
               onClick={() => setDark(!dark)}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400"
+              className="p-2 rounded-lg hover:bg-surface-border text-text-muted"
             >
               {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
@@ -217,7 +216,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Bottom Navigation — mobile */}
         {bottomItems.length > 0 && (
-          <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-xl border-t border-gray-200 dark:border-white/10 safe-bottom z-30">
+          <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-surface-bg/80 backdrop-blur-xl border-t border-surface-border safe-bottom z-30">
             <div className="flex items-center justify-around px-2 py-2">
               {bottomItems.map(({ href, icon: Icon, label }) => {
                 const active = pathname === href || pathname.startsWith(href + '/')
@@ -227,8 +226,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     href={href}
                     className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all min-w-[56px] ${
                       active
-                        ? 'text-orange-500'
-                        : 'text-gray-400 dark:text-gray-600'
+                        ? 'text-brand-accent'
+                        : 'text-text-muted'
                     }`}
                   >
                     <Icon className={`w-6 h-6 ${active ? 'scale-110' : ''} transition-transform`} />
