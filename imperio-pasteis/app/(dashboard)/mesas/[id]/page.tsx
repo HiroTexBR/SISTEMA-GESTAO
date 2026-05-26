@@ -93,6 +93,20 @@ export default function ComandaPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
+    // Auto-reparo: verifica se o usuário autenticado existe na tabela 'usuarios'
+    // Se não existir (ex: admin criado manualmente no Supabase), ele insere automaticamente
+    // para evitar o erro de foreign key constraint (comandas_garcom_id_fkey).
+    const { data: userExists } = await supabase.from('usuarios').select('id').eq('id', user.id).single()
+    if (!userExists) {
+      await supabase.from('usuarios').insert({
+        id: user.id,
+        nome: user.email?.split('@')[0] || 'Usuário',
+        email: user.email,
+        cargo: 'admin',
+        status: 'ativo'
+      })
+    }
+
     const { data, error } = await supabase
       .from('comandas')
       .insert({ mesa_id: mesaId, garcom_id: user.id, status: 'aberta' })
