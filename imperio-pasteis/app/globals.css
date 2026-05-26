@@ -57,14 +57,12 @@ body {
 /* Solid Cards (Corrigindo o bug de transparência) */
 .glass-card {
   background-color: var(--color-surface-card);
-  border: 1px solid rgba(244, 239, 235, 0.05); /* Brilho super sutil na borda */
   box-shadow: 0 8px 30px -4px rgba(0,0,0,0.5);
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .glass-card:hover {
   background-color: var(--color-surface-card-hover);
-  border-color: rgba(244, 239, 235, 0.1);
 }
 
 /* Status Badges */

@@ -539,10 +539,10 @@ export default function ComandaPage() {
 
 function ItemCard({ item, onRemover }: { item: ComandaItem; onRemover: () => void }) {
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-2xl border p-4 flex gap-3 transition-all ${
+    <div className={`rounded-2xl p-4 flex gap-3 transition-all ${
       item.enviado_para_producao
-        ? 'border-gray-200 dark:border-gray-800'
-        : 'border-orange-200 dark:border-orange-900 bg-orange-50/50 dark:bg-orange-900/10'
+        ? 'bg-white dark:bg-gray-900/50'
+        : 'bg-orange-50/50 dark:bg-orange-900/20'
     }`}>
       <div className="flex-1 min-w-0">
         <div className="flex items-start gap-2">
