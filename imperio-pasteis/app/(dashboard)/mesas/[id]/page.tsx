@@ -98,13 +98,18 @@ export default function ComandaPage() {
     // para evitar o erro de foreign key constraint (comandas_garcom_id_fkey).
     const { data: userExists } = await supabase.from('usuarios').select('id').eq('id', user.id).single()
     if (!userExists) {
-      await supabase.from('usuarios').insert({
+      const { error: insertUserError } = await supabase.from('usuarios').insert({
         id: user.id,
         nome: user.email?.split('@')[0] || 'Usuário',
         email: user.email,
         cargo: 'admin',
         status: 'ativo'
       })
+      if (insertUserError) {
+        toast.error('Erro no auto-reparo do usuário: ' + insertUserError.message)
+        console.error('Erro ao inserir usuario:', insertUserError)
+        return
+      }
     }
 
     const { data, error } = await supabase
