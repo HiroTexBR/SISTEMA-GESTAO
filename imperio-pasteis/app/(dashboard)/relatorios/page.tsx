@@ -2,103 +2,66 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { formatCurrency, formatDateTime } from '@/lib/utils'
+import { formatCurrency } from '@/lib/utils'
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
-  LineChart, Line
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
+  ResponsiveContainer
 } from 'recharts'
-import { Calendar, Download, TrendingUp, DollarSign, ArrowRightLeft, FileText, Loader2 } from 'lucide-react'
+import { TrendingUp, DollarSign, ArrowRightLeft, FileText, Loader2, Download, RefreshCw } from 'lucide-react'
+
+const S = {
+  bg: 'var(--color-surface-bg)', card: 'var(--color-surface-card)',
+  cardH: 'var(--color-surface-card-hover)', border: 'var(--color-surface-border)',
+  main: 'var(--color-text-main)', sub: 'var(--color-text-sub)', muted: 'var(--color-text-muted)',
+  accent: 'var(--color-brand-accent)', green: 'var(--color-status-free)',
+}
+
+const PERIODOS = [
+  { value: 'hoje',   label: 'Hoje' },
+  { value: 'semana', label: '7 dias' },
+  { value: 'mes',    label: '30 dias' },
+]
 
 export default function RelatoriosPage() {
   const supabase = createClient()
   const [loading, setLoading] = useState(true)
-  const [periodo, setPeriodo] = useState('mes') // hoje, semana, mes
-  
-  // Dados
-  const [resumo, setResumo] = useState({
-    total_vendas: 0,
-    qtd_pedidos: 0,
-    ticket_medio: 0,
-    dinheiro: 0,
-    pix: 0,
-    cartao: 0
-  })
+  const [periodo, setPeriodo] = useState('mes')
+  const [resumo, setResumo] = useState({ total_vendas: 0, qtd_pedidos: 0, ticket_medio: 0, dinheiro: 0, pix: 0, cartao: 0 })
   const [dadosGrafico, setDadosGrafico] = useState<any[]>([])
-  const [produtosMaisVendidos, setProdutosMaisVendidos] = useState<any[]>([])
 
   const carregarDados = useCallback(async () => {
     setLoading(true)
-    
-    // Calcular datas baseadas no período
     const hoje = new Date()
     let dataInicio = new Date()
-    
-    if (periodo === 'hoje') {
-      dataInicio.setHours(0, 0, 0, 0)
-    } else if (periodo === 'semana') {
-      dataInicio.setDate(hoje.getDate() - 7)
-    } else {
-      dataInicio.setMonth(hoje.getMonth() - 1)
-    }
+    if (periodo === 'hoje') dataInicio.setHours(0, 0, 0, 0)
+    else if (periodo === 'semana') dataInicio.setDate(hoje.getDate() - 7)
+    else dataInicio.setMonth(hoje.getMonth() - 1)
 
     const isoInicio = dataInicio.toISOString()
-
-    // Buscar pagamentos no período
     const { data: pagamentos } = await supabase
-      .from('pagamentos')
-      .select('valor, forma_pagamento, criado_em')
-      .gte('criado_em', isoInicio)
-
-    // Buscar comandas finalizadas no período
+      .from('pagamentos').select('valor, forma_pagamento, criado_em').gte('criado_em', isoInicio)
     const { data: comandas } = await supabase
-      .from('comandas')
-      .select('id, valor_final, criado_em')
-      .eq('status', 'finalizada')
-      .gte('criado_em', isoInicio)
+      .from('comandas').select('id, valor_final, criado_em').eq('status', 'finalizada').gte('criado_em', isoInicio)
 
-    // Calcular resumo financeiro
-    let total = 0
-    let dinheiro = 0
-    let pix = 0
-    let cartao = 0
-
+    let total = 0, dinheiro = 0, pix = 0, cartao = 0
     pagamentos?.forEach(p => {
       total += p.valor
       if (p.forma_pagamento === 'dinheiro') dinheiro += p.valor
       if (p.forma_pagamento === 'pix') pix += p.valor
       if (p.forma_pagamento.includes('credito') || p.forma_pagamento.includes('debito')) cartao += p.valor
     })
-
     const qtd = comandas?.length || 0
-    
-    setResumo({
-      total_vendas: total,
-      qtd_pedidos: qtd,
-      ticket_medio: qtd > 0 ? total / qtd : 0,
-      dinheiro,
-      pix,
-      cartao
-    })
+    setResumo({ total_vendas: total, qtd_pedidos: qtd, ticket_medio: qtd > 0 ? total / qtd : 0, dinheiro, pix, cartao })
 
-    // Agrupar dados para o gráfico (por dia)
     const agrupadoDia: Record<string, number> = {}
-    
-    // Inicializar dias vazios
     const dias = periodo === 'mes' ? 30 : periodo === 'semana' ? 7 : 1
     for (let i = dias; i >= 0; i--) {
-      const d = new Date()
-      d.setDate(d.getDate() - i)
+      const d = new Date(); d.setDate(d.getDate() - i)
       const dataStr = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
-      if (periodo !== 'hoje') {
-        agrupadoDia[dataStr] = 0
-      }
+      if (periodo !== 'hoje') agrupadoDia[dataStr] = 0
     }
-
     if (periodo === 'hoje') {
-      // Por hora
-      for (let i = 8; i <= 23; i++) {
-        agrupadoDia[`${i}h`] = 0
-      }
+      for (let i = 8; i <= 23; i++) agrupadoDia[`${i}h`] = 0
       pagamentos?.forEach(p => {
         const h = new Date(p.criado_em).getHours()
         if (agrupadoDia[`${h}h`] !== undefined) agrupadoDia[`${h}h`] += p.valor
@@ -109,147 +72,127 @@ export default function RelatoriosPage() {
         if (agrupadoDia[dia] !== undefined) agrupadoDia[dia] += p.valor
       })
     }
-
-    setDadosGrafico(Object.keys(agrupadoDia).map(k => ({
-      name: k,
-      total: agrupadoDia[k]
-    })))
-
+    setDadosGrafico(Object.keys(agrupadoDia).map(k => ({ name: k, total: agrupadoDia[k] })))
     setLoading(false)
-  }, [periodo, supabase])
+  }, [periodo])
 
-  useEffect(() => {
-    carregarDados()
-  }, [carregarDados])
+  useEffect(() => { carregarDados() }, [carregarDados])
+
+  const KPI_CARDS = [
+    { label: 'Vendas Brutas', value: formatCurrency(resumo.total_vendas), icon: DollarSign, color: S.accent },
+    { label: 'Pedidos',       value: resumo.qtd_pedidos.toString(),        icon: FileText,   color: 'var(--color-status-prep)' },
+    { label: 'Ticket Médio',  value: formatCurrency(resumo.ticket_medio),  icon: TrendingUp, color: S.green },
+    { label: 'PIX',           value: formatCurrency(resumo.pix),           icon: ArrowRightLeft, color: '#A855F7' },
+  ]
+
+  const FORMAS = [
+    { label: 'PIX',      valor: resumo.pix,      color: '#14B8A6' },
+    { label: 'Cartões',  valor: resumo.cartao,   color: 'var(--color-status-prep)' },
+    { label: 'Dinheiro', valor: resumo.dinheiro, color: S.green },
+  ]
 
   return (
-    <div className="p-4 lg:p-6 space-y-6 animate-fade-in">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="p-4 lg:p-6 space-y-5 animate-fade-in max-w-7xl mx-auto">
+
+      {/* ── HEADER ── */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Relatórios</h1>
-          <p className="text-sm text-gray-500">Acompanhamento financeiro e métricas</p>
+          <h1 className="font-display font-bold text-2xl tracking-tight" style={{ color: S.main }}>Relatórios</h1>
+          <p className="text-xs mt-0.5" style={{ color: S.muted }}>Acompanhamento financeiro</p>
         </div>
-
         <div className="flex items-center gap-2">
-          <select
-            value={periodo}
-            onChange={(e) => setPeriodo(e.target.value)}
-            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm rounded-xl px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-orange-400"
+          {/* Seletor de período */}
+          <div className="flex rounded-lg overflow-hidden" style={{ border: `1px solid ${S.border}` }}>
+            {PERIODOS.map(p => (
+              <button
+                key={p.value}
+                onClick={() => setPeriodo(p.value)}
+                className="px-3 py-2 text-xs font-bold transition-all"
+                style={{
+                  backgroundColor: periodo === p.value ? S.accent : S.card,
+                  color: periodo === p.value ? '#fff' : S.muted,
+                }}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={carregarDados}
+            className="p-2.5 rounded-lg transition-colors"
+            style={{ backgroundColor: S.card, color: S.muted }}
           >
-            <option value="hoje">Hoje</option>
-            <option value="semana">Últimos 7 dias</option>
-            <option value="mes">Últimos 30 dias</option>
-          </select>
-
-          <button className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold px-4 py-2 rounded-xl transition-all">
-            <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Exportar</span>
+            <RefreshCw className="w-4 h-4" />
           </button>
         </div>
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+          <Loader2 className="w-8 h-8 animate-spin" style={{ color: S.accent }} />
         </div>
       ) : (
         <>
-          {/* Resumo Financeiro */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
-              <div className="flex items-center gap-3 text-orange-600 mb-2">
-                <div className="p-2 bg-orange-100 rounded-lg">
-                  <DollarSign className="w-5 h-5" />
+          {/* ── KPI CARDS ── */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {KPI_CARDS.map(k => {
+              const Icon = k.icon
+              return (
+                <div key={k.label} className="card p-4">
+                  <div
+                    className="w-9 h-9 rounded-lg flex items-center justify-center mb-4"
+                    style={{ backgroundColor: `${k.color}18` }}
+                  >
+                    <Icon className="w-4 h-4" style={{ color: k.color }} />
+                  </div>
+                  <p className="font-display font-bold text-xl leading-none" style={{ color: S.main }}>{k.value}</p>
+                  <p className="text-[11px] uppercase tracking-wider font-semibold mt-2" style={{ color: S.muted }}>{k.label}</p>
                 </div>
-                <p className="text-sm font-medium">Vendas Brutas</p>
-              </div>
-              <p className="text-2xl font-black text-gray-900 dark:text-white">
-                {formatCurrency(resumo.total_vendas)}
-              </p>
-            </div>
-
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
-              <div className="flex items-center gap-3 text-blue-600 mb-2">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <FileText className="w-5 h-5" />
-                </div>
-                <p className="text-sm font-medium">Pedidos</p>
-              </div>
-              <p className="text-2xl font-black text-gray-900 dark:text-white">
-                {resumo.qtd_pedidos}
-              </p>
-            </div>
-
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
-              <div className="flex items-center gap-3 text-emerald-600 mb-2">
-                <div className="p-2 bg-emerald-100 rounded-lg">
-                  <TrendingUp className="w-5 h-5" />
-                </div>
-                <p className="text-sm font-medium">Ticket Médio</p>
-              </div>
-              <p className="text-2xl font-black text-gray-900 dark:text-white">
-                {formatCurrency(resumo.ticket_medio)}
-              </p>
-            </div>
-
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
-              <div className="flex items-center gap-3 text-purple-600 mb-2">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <ArrowRightLeft className="w-5 h-5" />
-                </div>
-                <p className="text-sm font-medium">PIX</p>
-              </div>
-              <p className="text-2xl font-black text-gray-900 dark:text-white">
-                {formatCurrency(resumo.pix)}
-              </p>
-              <p className="text-xs text-gray-400 mt-1">
-                Representa {resumo.total_vendas > 0 ? Math.round((resumo.pix / resumo.total_vendas) * 100) : 0}%
-              </p>
-            </div>
+              )
+            })}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Gráfico principal */}
-            <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-6">Evolução das Vendas</h3>
-              <div className="h-[300px]">
+          {/* ── GRÁFICO + FORMAS DE PAGAMENTO ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Gráfico de barras */}
+            <div className="lg:col-span-2 card p-5">
+              <h3 className="font-display font-semibold text-base mb-5" style={{ color: S.main }}>
+                Evolução das Vendas
+              </h3>
+              <div className="h-[260px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={dadosGrafico}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                    <XAxis 
-                      dataKey="name" 
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 12, fill: '#6b7280' }}
-                      dy={10}
+                  <BarChart data={dadosGrafico} barCategoryGap="30%">
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
+                    <XAxis
+                      dataKey="name" axisLine={false} tickLine={false}
+                      tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }} dy={8}
                     />
-                    <YAxis 
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 12, fill: '#6b7280' }}
-                      tickFormatter={(value) => `R$ ${value}`}
+                    <YAxis
+                      axisLine={false} tickLine={false}
+                      tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }}
+                      tickFormatter={v => `R$${v}`}
                     />
-                    <RechartsTooltip 
-                      cursor={{ fill: 'transparent' }}
+                    <RechartsTooltip
+                      cursor={{ fill: 'rgba(249,115,22,0.05)' }}
                       content={({ active, payload, label }) => {
                         if (active && payload && payload.length) {
                           return (
-                            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl rounded-xl p-3">
-                              <p className="text-sm text-gray-500 mb-1">{label}</p>
-                              <p className="font-bold text-orange-500">
+                            <div className="p-3 rounded-lg shadow-xl"
+                              style={{ backgroundColor: 'var(--color-surface-card)', border: `1px solid var(--color-surface-border)` }}>
+                              <p className="text-xs mb-1" style={{ color: 'var(--color-text-muted)' }}>{label}</p>
+                              <p className="font-bold text-sm" style={{ color: S.accent }}>
                                 {formatCurrency(payload[0].value as number)}
                               </p>
                             </div>
-                          );
+                          )
                         }
-                        return null;
+                        return null
                       }}
                     />
-                    <Bar 
-                      dataKey="total" 
-                      fill="#f97316" 
-                      radius={[4, 4, 0, 0]} 
-                      barSize={periodo === 'mes' ? 12 : 30}
+                    <Bar
+                      dataKey="total" fill={S.accent}
+                      radius={[4, 4, 0, 0]}
+                      barSize={periodo === 'mes' ? 10 : 28}
                     />
                   </BarChart>
                 </ResponsiveContainer>
@@ -257,35 +200,43 @@ export default function RelatoriosPage() {
             </div>
 
             {/* Formas de pagamento */}
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-6">Receitas por Forma</h3>
-              
+            <div className="card p-5">
+              <h3 className="font-display font-semibold text-base mb-5" style={{ color: S.main }}>
+                Por Forma de Pagamento
+              </h3>
               <div className="space-y-5">
-                {[
-                  { label: 'PIX', valor: resumo.pix, cor: 'bg-teal-500' },
-                  { label: 'Cartões', valor: resumo.cartao, cor: 'bg-blue-500' },
-                  { label: 'Dinheiro', valor: resumo.dinheiro, cor: 'bg-emerald-500' },
-                ].map(item => {
+                {FORMAS.map(item => {
                   const perc = resumo.total_vendas > 0 ? (item.valor / resumo.total_vendas) * 100 : 0
-                  
                   return (
                     <div key={item.label}>
                       <div className="flex justify-between items-end mb-2">
                         <div>
-                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{item.label}</p>
-                          <p className="text-xs text-gray-400">{perc.toFixed(1)}%</p>
+                          <p className="text-sm font-medium" style={{ color: S.sub }}>{item.label}</p>
+                          <p className="text-xs" style={{ color: S.muted }}>{perc.toFixed(1)}%</p>
                         </div>
-                        <p className="font-bold text-gray-900 dark:text-white">{formatCurrency(item.valor)}</p>
+                        <p className="font-bold text-sm" style={{ color: S.main }}>{formatCurrency(item.valor)}</p>
                       </div>
-                      <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2">
-                        <div 
-                          className={`h-2 rounded-full ${item.cor}`}
-                          style={{ width: `${perc}%` }}
+                      <div className="w-full rounded-full h-1.5" style={{ backgroundColor: S.border }}>
+                        <div
+                          className="h-1.5 rounded-full transition-all duration-500"
+                          style={{ width: `${perc}%`, backgroundColor: item.color }}
                         />
                       </div>
                     </div>
                   )
                 })}
+              </div>
+
+              {/* Resumo numérico */}
+              <div className="mt-6 pt-4 space-y-2" style={{ borderTop: `1px solid ${S.border}` }}>
+                <div className="flex justify-between text-sm">
+                  <span style={{ color: S.muted }}>Total Geral</span>
+                  <span className="font-bold" style={{ color: S.accent }}>{formatCurrency(resumo.total_vendas)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span style={{ color: S.muted }}>Pedidos</span>
+                  <span className="font-bold" style={{ color: S.main }}>{resumo.qtd_pedidos}</span>
+                </div>
               </div>
             </div>
           </div>
