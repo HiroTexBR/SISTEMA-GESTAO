@@ -66,24 +66,12 @@ export default function LoginPage() {
 
         {/* Logo */}
         <div className="text-center mb-10">
-          <div
-            className="inline-flex items-center justify-center w-14 h-14 rounded-xl mb-5"
-            style={{ backgroundColor: 'var(--color-brand-accent)' }}
-          >
-            <UtensilsCrossed className="w-7 h-7 text-white" />
-          </div>
-          <h1
-            className="font-display font-bold text-3xl tracking-tight mb-1"
-            style={{ color: 'var(--color-text-main)' }}
-          >
-            IMPÉRIO PASTÉIS
-          </h1>
-          <p
-            className="text-xs font-semibold tracking-[0.18em] uppercase"
-            style={{ color: 'var(--color-brand-accent)' }}
-          >
-            Sistema de Gestão
-          </p>
+          <img 
+            src="/logo.png" 
+            alt="Império dos Pastéis" 
+            className="w-48 mx-auto mb-6 drop-shadow-xl" 
+          />
+          <h1 className="sr-only">Império dos Pastéis</h1>
         </div>
 
         {/* Card de login */}

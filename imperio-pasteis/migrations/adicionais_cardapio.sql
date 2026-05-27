@@ -40,7 +40,11 @@ ALTER TABLE comanda_itens
   ADD COLUMN IF NOT EXISTS total_adicionais numeric(10,2) DEFAULT 0.00,
   ADD COLUMN IF NOT EXISTS adicionais_texto text;  -- snapshot p/ impressão: "Bacon, Catupiry, Queijo"
 
--- ─── 5. POPULANDO ADICIONAIS ────────────────────────────────
+-- ─── 5. POPULANDO ADICIONAIS ────────────────────────────────-- 🥘 5. POPULANDO ADICIONAIS 🥘
+-- Limpa os dados antigos para evitar duplicidade ou misturar cardápios
+TRUNCATE TABLE categorias CASCADE;
+TRUNCATE TABLE adicionais CASCADE;
+
 INSERT INTO adicionais (nome, tipo, preco_extra, ordem) VALUES
   -- Salgados
   ('Bacon',     'salgado', 1.00, 1),
@@ -185,10 +189,15 @@ ALTER TABLE adicionais ENABLE ROW LEVEL SECURITY;
 ALTER TABLE produto_adicionais_config ENABLE ROW LEVEL SECURITY;
 ALTER TABLE comanda_item_adicionais ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "adicionais_leitura" ON adicionais;
 CREATE POLICY "adicionais_leitura" ON adicionais FOR SELECT USING (true);
+DROP POLICY IF EXISTS "adicionais_config_leitura" ON produto_adicionais_config;
 CREATE POLICY "adicionais_config_leitura" ON produto_adicionais_config FOR SELECT USING (true);
+DROP POLICY IF EXISTS "comanda_item_adicionais_all" ON comanda_item_adicionais;
 CREATE POLICY "comanda_item_adicionais_all" ON comanda_item_adicionais FOR ALL USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "adicionais_write" ON adicionais;
 CREATE POLICY "adicionais_write" ON adicionais FOR ALL USING (auth.role() = 'authenticated') WITH CHECK (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "config_write" ON produto_adicionais_config;
 CREATE POLICY "config_write" ON produto_adicionais_config FOR ALL USING (auth.role() = 'authenticated') WITH CHECK (auth.role() = 'authenticated');
 
 -- ─── PRONTO! ─────────────────────────────────────────────────

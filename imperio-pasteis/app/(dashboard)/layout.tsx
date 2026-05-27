@@ -92,12 +92,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       `} style={{ backgroundColor: 'var(--color-surface-card)', borderRight: '1px solid var(--color-surface-border)' }}>
 
         {/* Logo */}
-        <div className="flex items-center gap-3 px-5 h-16 flex-shrink-0" style={{ borderBottom: '1px solid var(--color-surface-border)' }}>
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'var(--color-brand-accent)' }}>
-            <UtensilsCrossed className="w-4 h-4 text-white" />
-          </div>
+        <div className="flex items-center gap-3 px-5 py-3 h-auto min-h-[64px] flex-shrink-0" style={{ borderBottom: '1px solid var(--color-surface-border)' }}>
+          <img 
+            src="/logo.png" 
+            alt="Império dos Pastéis" 
+            className="w-12 h-auto rounded"
+          />
           <div className="min-w-0 flex-1">
-            <p className="font-display font-bold text-sm tracking-tight" style={{ color: 'var(--color-text-main)' }}>IMPÉRIO PASTÉIS</p>
+            <p className="font-display font-bold text-[13px] leading-tight tracking-tight" style={{ color: 'var(--color-text-main)' }}>IMPÉRIO DOS PASTÉIS</p>
             <p className="text-xs capitalize font-medium" style={{ color: 'var(--color-brand-accent)' }}>{cargo}</p>
           </div>
           <button
@@ -187,10 +189,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </button>
 
           <div className="flex items-center gap-2 flex-1">
-            <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{ background: 'var(--color-brand-accent)' }}>
-              <UtensilsCrossed className="w-3 h-3 text-white" />
-            </div>
-            <span className="font-display font-bold text-sm tracking-tight" style={{ color: 'var(--color-text-main)' }}>IMPÉRIO PASTÉIS</span>
+            <img 
+              src="/logo.png" 
+              alt="Império dos Pastéis" 
+              className="w-7 h-auto"
+            />
+            <span className="font-display font-bold text-sm tracking-tight" style={{ color: 'var(--color-text-main)' }}>IMPÉRIO DOS PASTÉIS</span>
           </div>
 
           <div className="flex items-center gap-2">
