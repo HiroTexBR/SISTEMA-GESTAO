@@ -92,12 +92,41 @@ export interface ComandaItem {
   quantidade: number
   preco_unitario: number
   total: number
+  total_adicionais?: number
+  adicionais_texto?: string
   observacao?: string
   status: StatusItem
   enviado_para_producao: boolean
   enviado_em?: string
   garcom_id?: string
   criado_em: string
+  adicionais?: ComandaItemAdicional[]
+}
+
+export interface Adicional {
+  id: string
+  nome: string
+  tipo: 'salgado' | 'doce' | 'recheio_extra'
+  preco_extra: number
+  ativo: boolean
+  ordem: number
+}
+
+export interface ProdutoAdicionalConfig {
+  id: string
+  produto_id: string
+  aceita_adicionais: boolean
+  max_gratis: number
+  preco_por_extra: number
+  tipo_adicional: 'salgado' | 'doce' | 'ambos'
+}
+
+export interface ComandaItemAdicional {
+  id: string
+  comanda_item_id: string
+  adicional_id?: string
+  nome_adicional: string
+  preco_cobrado: number
 }
 
 export interface PedidoProducao {
