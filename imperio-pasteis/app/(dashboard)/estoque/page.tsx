@@ -834,7 +834,7 @@ CREATE POLICY "allow_all_insumo_mov" ON insumo_movimentacoes FOR ALL TO authenti
             </div>
           </div>
         </div>
-      ), document.body)}
+      , document.body)}
 
       {/* ══════════════════════════════════════════════════
           MODAL — MOVIMENTAÇÃO
@@ -955,7 +955,7 @@ CREATE POLICY "allow_all_insumo_mov" ON insumo_movimentacoes FOR ALL TO authenti
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
 
       {/* ══════════════════════════════════════════════════
           MODAL — CONFIRMAR EXCLUSÃO
