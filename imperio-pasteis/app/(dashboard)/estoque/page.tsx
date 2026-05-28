@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatDateTime } from '@/lib/utils'
+import type { Impressora } from '@/lib/types'
 import {
   Package, AlertTriangle, Plus, Minus,
   RefreshCw, Search, History, X, Loader2, CheckCircle2,
@@ -116,6 +117,8 @@ export default function EstoquePage() {
 
   // Modal balanço do dia
   const [showBalanco, setShowBalanco] = useState(false)
+  const [impressoras, setImpressoras] = useState<Impressora[]>([])
+  const [imprimindoTermica, setImprimindoTermica] = useState(false)
 
   const carregar = useCallback(async () => {
     // Tenta carregar da tabela insumos
@@ -142,6 +145,11 @@ export default function EstoquePage() {
       .limit(50)
 
     if (movs) setMovimentacoes(movs as Movimentacao[])
+
+    // Carrega impressoras ativas
+    const { data: imps } = await supabase.from('impressoras').select('*').eq('ativa', true)
+    if (imps) setImpressoras(imps as Impressora[])
+
     setLoading(false)
   }, [])
 
@@ -248,6 +256,70 @@ export default function EstoquePage() {
       setShowMovModal(false); carregar()
     } catch (err: any) { toast.error('Erro: ' + (err?.message || '')) }
     finally { setSalvandoMov(false) }
+  }
+
+  async function enviarParaTermica(impressora: Impressora) {
+    setImprimindoTermica(true)
+    try {
+      const zerados = insumos.filter(i => i.quantidade_atual === 0)
+      const baixos = insumos.filter(i => i.quantidade_atual > 0 && i.quantidade_atual <= i.quantidade_minima)
+      const okItems = insumos.filter(i => i.quantidade_atual > i.quantidade_minima)
+      const precisaComprar = [...zerados, ...baixos]
+      
+      const largura = impressora.largura_papel === '80mm' ? 48 : 32
+      const linha = '='.repeat(largura)
+      const linhaFraca = '-'.repeat(largura)
+      
+      let conteudo = `
+${linha}
+       BALANCO DO DIA - ESTOQUE
+       IMPERIO PASTEIS
+${linha}
+DATA/HORA: ${new Date().toLocaleString('pt-BR')}
+
+RESUMO:
+ OK: ${okItems.length} | BAIXO: ${baixos.length} | ZERADO: ${zerados.length}
+`
+      if (precisaComprar.length > 0) {
+        conteudo += `\n${linha}\n      LISTA DE COMPRAS (${precisaComprar.length})\n${linha}\n`
+        
+        if (zerados.length > 0) {
+          conteudo += `\n[ ZERADOS - URGENTE ]\n`
+          zerados.forEach(ins => {
+            conteudo += `${ins.nome}\n`
+            conteudo += ` > COMPRAR: ${ins.quantidade_minima} ${ins.unidade}\n`
+            conteudo += `${linhaFraca}\n`
+          })
+        }
+        
+        if (baixos.length > 0) {
+          conteudo += `\n[ ABAIXO DO MINIMO ]\n`
+          baixos.forEach(ins => {
+            conteudo += `${ins.nome}\n`
+            conteudo += ` > ATUAL: ${ins.quantidade_atual} ${ins.unidade}\n`
+            conteudo += ` > COMPRAR: ${Math.ceil(ins.quantidade_minima - ins.quantidade_atual)} ${ins.unidade}\n`
+            conteudo += `${linhaFraca}\n`
+          })
+        }
+      }
+      
+      conteudo += `\n${linha}\nCONFERIDO POR: ________________\n\n\n[CORTE]\n`
+
+      const { error } = await supabase.from('fila_impressao').insert({
+        tipo_documento: 'balanco_estoque',
+        impressora_id: impressora.id,
+        conteudo,
+        status: 'pendente',
+        modo_simulacao: false
+      })
+      
+      if (error) throw error
+      toast.success(`Enviado para a impressora ${impressora.nome}!`)
+    } catch (err: any) {
+      toast.error('Erro ao enviar para impressora: ' + err.message)
+    } finally {
+      setImprimindoTermica(false)
+    }
   }
 
   // ── Filtros ───────────────────────────────────────────────
@@ -1187,22 +1259,45 @@ CREATE POLICY "allow_all_insumo_mov" ON insumo_movimentacoes FOR ALL TO authenti
                 </div>
 
                 {/* Botões de ação (não imprimem) */}
-                <div className="no-print flex items-center gap-3 mt-2">
-                  <button
-                    onClick={() => setShowBalanco(false)}
-                    className="btn-secondary flex-1 py-3"
-                  >
-                    <X className="w-4 h-4" />
-                    Fechar
-                  </button>
-                  <button
-                    onClick={() => window.print()}
-                    className="btn-primary flex-1 py-3"
-                    style={{ backgroundColor: '#f97316' }}
-                  >
-                    <Printer className="w-4 h-4" />
-                    Imprimir Balanço
-                  </button>
+                <div className="no-print space-y-3 mt-2">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setShowBalanco(false)}
+                      className="btn-secondary flex-1 py-3"
+                    >
+                      <X className="w-4 h-4" />
+                      Fechar
+                    </button>
+                    <button
+                      onClick={() => window.print()}
+                      className="btn-primary flex-1 py-3"
+                      style={{ backgroundColor: '#f97316' }}
+                    >
+                      <Printer className="w-4 h-4" />
+                      Imprimir (A4)
+                    </button>
+                  </div>
+
+                  {impressoras.length > 0 && (
+                    <div className="border-t border-gray-100 pt-3 flex flex-col gap-2">
+                      <p className="text-xs text-gray-500 font-semibold text-center uppercase tracking-widest">
+                        Imprimir na Térmica
+                      </p>
+                      <div className="flex flex-wrap items-center justify-center gap-2">
+                        {impressoras.map(imp => (
+                          <button
+                            key={imp.id}
+                            onClick={() => enviarParaTermica(imp)}
+                            disabled={imprimindoTermica}
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-semibold transition-colors disabled:opacity-50"
+                          >
+                            {imprimindoTermica ? <Loader2 className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4 text-gray-500" />}
+                            {imp.nome}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
