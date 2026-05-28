@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Suspense } from 'react'
+import { createPortal } from 'react-dom'
 
 const FORMAS_PAGAMENTO = [
   { id: 'pix',      label: 'PIX',      icon: Smartphone, color: 'var(--color-status-free)'  },
@@ -285,7 +286,7 @@ function CaixaContent() {
 
           {/* Footer */}
           <div
-            className="p-4 space-y-3 sticky bottom-0"
+            className="p-4 space-y-3 sticky bottom-0 pb-24 lg:pb-4"
             style={{ backgroundColor: S.card, borderTop: `1px solid ${S.border}`, zIndex: 10 }}
           >
             <div className="flex items-center justify-between text-sm">
@@ -317,8 +318,8 @@ function CaixaContent() {
       )}
 
       {/* ── MODAL DE PAGAMENTO ── */}
-      {showPagamento && comandaSelecionada && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-end lg:items-center justify-center animate-fade-in">
+      {showPagamento && comandaSelecionada && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 bg-black/70 z-[100] flex items-end lg:items-center justify-center animate-fade-in">
           <div
             className="w-full lg:max-w-md max-h-[90vh] overflow-y-auto"
             style={{
@@ -478,7 +479,7 @@ function CaixaContent() {
             </div>
           </div>
         </div>
-      )}
+      ), document.body)}
     </div>
   )
 }

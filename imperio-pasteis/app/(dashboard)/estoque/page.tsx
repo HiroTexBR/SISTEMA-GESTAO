@@ -12,6 +12,7 @@ import {
   ClipboardList, ShoppingBag
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { createPortal } from 'react-dom'
 
 type TipoMovimento = 'entrada' | 'saida' | 'ajuste'
 
@@ -687,8 +688,8 @@ CREATE POLICY "allow_all_insumo_mov" ON insumo_movimentacoes FOR ALL TO authenti
       {/* ══════════════════════════════════════════════════
           MODAL — CADASTRAR / EDITAR INSUMO
       ══════════════════════════════════════════════════ */}
-      {showCadModal && (
-        <div className="fixed inset-0 bg-black/75 z-50 flex items-end lg:items-center justify-center animate-fade-in">
+      {showCadModal && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 bg-black/75 z-[100] flex items-end lg:items-center justify-center animate-fade-in">
           <div className="w-full lg:max-w-lg max-h-[92vh] overflow-y-auto"
             style={{ backgroundColor: S.card, borderRadius: '20px 20px 0 0' }}>
 
@@ -833,13 +834,13 @@ CREATE POLICY "allow_all_insumo_mov" ON insumo_movimentacoes FOR ALL TO authenti
             </div>
           </div>
         </div>
-      )}
+      ), document.body)}
 
       {/* ══════════════════════════════════════════════════
           MODAL — MOVIMENTAÇÃO
       ══════════════════════════════════════════════════ */}
-      {showMovModal && insumoSelecionado && (
-        <div className="fixed inset-0 bg-black/75 z-50 flex items-end lg:items-center justify-center animate-fade-in">
+      {showMovModal && insumoSelecionado && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 bg-black/75 z-[100] flex items-end lg:items-center justify-center animate-fade-in">
           <div className="w-full lg:max-w-md max-h-[90vh] overflow-y-auto"
             style={{ backgroundColor: S.card, borderRadius: '20px 20px 0 0' }}>
 
@@ -1003,8 +1004,10 @@ CREATE POLICY "allow_all_insumo_mov" ON insumo_movimentacoes FOR ALL TO authenti
 
         const precisaComprar = [...zerados, ...baixos]
 
-        return (
-          <div className="fixed inset-0 bg-black/80 z-50 flex items-start justify-center overflow-y-auto py-4 px-2 animate-fade-in">
+        if (typeof document === 'undefined') return null
+
+        return createPortal(
+          <div className="fixed inset-0 bg-black/80 z-[100] flex items-start justify-center overflow-y-auto py-4 px-2 animate-fade-in">
             {/* Estilos de impressão inline */}
             <style>{`
               @media print {
@@ -1302,7 +1305,7 @@ CREATE POLICY "allow_all_insumo_mov" ON insumo_movimentacoes FOR ALL TO authenti
               </div>
             </div>
           </div>
-        )
+        , document.body)
       })()}
     </div>
   )
