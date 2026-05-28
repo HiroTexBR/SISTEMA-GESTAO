@@ -155,7 +155,7 @@ function CaixaContent() {
   })
 
   return (
-    <div className="flex flex-col lg:flex-row h-full" style={{ backgroundColor: S.bg }}>
+    <div className="flex flex-col lg:flex-row" style={{ backgroundColor: S.bg, minHeight: 'calc(100vh - 56px)' }}>
 
       {/* ── LISTA LATERAL ── */}
       <div
@@ -233,7 +233,7 @@ function CaixaContent() {
 
       {/* ── DETALHE COMANDA ── */}
       {comandaSelecionada ? (
-        <div className="flex-1 flex flex-col min-h-0">
+        <div className="flex-1 flex flex-col" style={{ minHeight: 0 }}>
           {/* Header */}
           <div
             className="flex items-center gap-3 px-4 h-14 flex-shrink-0"
@@ -262,7 +262,7 @@ function CaixaContent() {
           </div>
 
           {/* Itens */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-2">
+          <div className="overflow-y-auto p-4 space-y-2" style={{ flex: '1 1 0', minHeight: '80px' }}>
             {itens.map(item => (
               <div
                 key={item.id}
@@ -285,8 +285,8 @@ function CaixaContent() {
 
           {/* Footer */}
           <div
-            className="p-4 space-y-3 flex-shrink-0"
-            style={{ backgroundColor: S.card, borderTop: `1px solid ${S.border}` }}
+            className="p-4 space-y-3 sticky bottom-0"
+            style={{ backgroundColor: S.card, borderTop: `1px solid ${S.border}`, zIndex: 10 }}
           >
             <div className="flex items-center justify-between text-sm">
               <span style={{ color: S.muted }}>Subtotal</span>

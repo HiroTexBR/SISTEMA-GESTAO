@@ -93,11 +93,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Logo */}
         <div className="flex items-center gap-3 px-5 py-3 h-auto min-h-[64px] flex-shrink-0" style={{ borderBottom: '1px solid var(--color-surface-border)' }}>
-          <img 
-            src="/logo.png" 
-            alt="Império dos Pastéis" 
-            className="w-12 h-auto rounded"
-          />
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-xl" style={{ background: 'var(--color-surface-bg)', border: '1px solid var(--color-surface-border)' }}>
+            👑
+          </div>
           <div className="min-w-0 flex-1">
             <p className="font-display font-bold text-[13px] leading-tight tracking-tight" style={{ color: 'var(--color-text-main)' }}>IMPÉRIO DOS PASTÉIS</p>
             <p className="text-xs capitalize font-medium" style={{ color: 'var(--color-brand-accent)' }}>{cargo}</p>
@@ -189,11 +187,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </button>
 
           <div className="flex items-center gap-2 flex-1">
-            <img 
-              src="/logo.png" 
-              alt="Império dos Pastéis" 
-              className="w-7 h-auto"
-            />
+            <span className="text-xl">👑</span>
             <span className="font-display font-bold text-sm tracking-tight" style={{ color: 'var(--color-text-main)' }}>IMPÉRIO DOS PASTÉIS</span>
           </div>
 
