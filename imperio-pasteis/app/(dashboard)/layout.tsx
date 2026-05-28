@@ -197,13 +197,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Conteúdo scrollável */}
-        <main className="flex-1 overflow-y-auto pb-16 lg:pb-0">
+        <main className="flex-1 overflow-y-auto lg:pb-0">
           {children}
         </main>
 
         {/* ── BOTTOM NAV — mobile ── */}
         {bottomItems.length > 0 && (
-          <nav className="lg:hidden fixed bottom-0 inset-x-0 safe-bottom z-30"
+          <nav className="lg:hidden safe-bottom z-30 flex-shrink-0"
             style={{ backgroundColor: 'var(--color-surface-card)', borderTop: '1px solid var(--color-surface-border)' }}>
             <div className="flex items-center justify-around px-2 py-1">
               {bottomItems.map(({ href, icon: Icon, label }) => {

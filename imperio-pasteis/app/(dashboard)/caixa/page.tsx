@@ -156,7 +156,7 @@ function CaixaContent() {
   })
 
   return (
-    <div className="flex flex-col lg:flex-row" style={{ backgroundColor: S.bg, minHeight: 'calc(100vh - 56px)' }}>
+    <div className="flex flex-col lg:flex-row h-full w-full" style={{ backgroundColor: S.bg }}>
 
       {/* ── LISTA LATERAL ── */}
       <div
@@ -286,7 +286,7 @@ function CaixaContent() {
 
           {/* Footer */}
           <div
-            className="p-4 space-y-3 sticky bottom-0 pb-24 lg:pb-4"
+            className="p-4 space-y-3 sticky bottom-0 pb-6 lg:pb-4"
             style={{ backgroundColor: S.card, borderTop: `1px solid ${S.border}`, zIndex: 10 }}
           >
             <div className="flex items-center justify-between text-sm">
