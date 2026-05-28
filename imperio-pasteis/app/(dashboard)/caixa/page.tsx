@@ -121,7 +121,7 @@ function CaixaContent() {
       }).eq('id', comandaSelecionada.id)
 
       const { data: impressora } = await supabase
-        .from('impressoras').select('id, modo_teste').eq('setor', 'caixa').eq('ativa', true).single()
+        .from('impressoras').select('id, modo_teste').eq('setor', 'caixa').eq('ativa', true).maybeSingle()
       if (impressora) {
         const conteudo = gerarRecibo(comandaSelecionada, itens, total, formaPagamento, troco)
         await supabase.from('fila_impressao').insert({
