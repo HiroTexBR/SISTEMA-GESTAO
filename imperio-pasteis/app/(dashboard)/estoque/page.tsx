@@ -7,7 +7,8 @@ import {
   Package, AlertTriangle, Plus, Minus,
   RefreshCw, Search, History, X, Loader2, CheckCircle2,
   BarChart3, ArrowUpRight, ArrowDownRight, Edit2, Trash2,
-  Save, PackagePlus, TrendingDown, ShoppingCart
+  Save, PackagePlus, TrendingDown, ShoppingCart, Printer,
+  ClipboardList, ShoppingBag
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -112,6 +113,9 @@ export default function EstoquePage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deletando, setDeletando] = useState<Insumo | null>(null)
   const [excluindo, setExcluindo] = useState(false)
+
+  // Modal balanço do dia
+  const [showBalanco, setShowBalanco] = useState(false)
 
   const carregar = useCallback(async () => {
     // Tenta carregar da tabela insumos
@@ -363,6 +367,14 @@ CREATE POLICY "allow_all_insumo_mov" ON insumo_movimentacoes FOR ALL TO authenti
           <button onClick={carregar} className="p-2.5 rounded-lg transition-colors"
             style={{ backgroundColor: S.card, color: S.muted }}>
             <RefreshCw className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setShowBalanco(true)}
+            className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all"
+            style={{ backgroundColor: S.card, color: S.main, border: `1px solid ${S.border}` }}
+          >
+            <Printer className="w-4 h-4" style={{ color: S.accent }} />
+            <span className="hidden sm:inline">Balanço do Dia</span>
           </button>
           <button onClick={abrirNovo} className="btn-primary px-4 py-2.5 text-sm">
             <PackagePlus className="w-4 h-4" />
@@ -902,6 +914,301 @@ CREATE POLICY "allow_all_insumo_mov" ON insumo_movimentacoes FOR ALL TO authenti
           </div>
         </div>
       )}
+
+      {/* ══════════════════════════════════════════════════════════════
+          MODAL — BALANÇO DO DIA (com impressão)
+      ══════════════════════════════════════════════════════════════ */}
+      {showBalanco && (() => {
+        const agora = new Date()
+        const dataFormatada = agora.toLocaleDateString('pt-BR', {
+          weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+        })
+        const horaFormatada = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+
+        const zerados   = insumos.filter(i => i.quantidade_atual === 0)
+        const baixos    = insumos.filter(i => i.quantidade_atual > 0 && i.quantidade_atual <= i.quantidade_minima)
+        const okItems   = insumos.filter(i => i.quantidade_atual > i.quantidade_minima)
+
+        const precisaComprar = [...zerados, ...baixos]
+
+        return (
+          <div className="fixed inset-0 bg-black/80 z-50 flex items-start justify-center overflow-y-auto py-4 px-2 animate-fade-in">
+            {/* Estilos de impressão inline */}
+            <style>{`
+              @media print {
+                body * { visibility: hidden !important; }
+                #balanco-print, #balanco-print * { visibility: visible !important; }
+                #balanco-print {
+                  position: fixed !important;
+                  top: 0 !important; left: 0 !important;
+                  width: 100% !important;
+                  background: white !important;
+                  color: black !important;
+                  font-family: Arial, sans-serif !important;
+                  padding: 20px !important;
+                  font-size: 12pt !important;
+                }
+                .no-print { display: none !important; }
+              }
+            `}</style>
+
+            <div id="balanco-print" className="w-full max-w-3xl rounded-2xl overflow-hidden"
+              style={{ backgroundColor: '#fff', color: '#111' }}>
+
+              {/* ── CABEÇALHO IMPRIMÍVEL ── */}
+              <div className="p-6 border-b-2 border-gray-200"
+                style={{ background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)' }}>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h1 className="font-black text-2xl text-white tracking-tight">
+                      🥟 IMPÉRIO PASTÉIS
+                    </h1>
+                    <p className="text-orange-100 text-sm font-semibold mt-1">
+                      Balanço Diário de Estoque
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-white font-bold text-sm capitalize">{dataFormatada}</p>
+                    <p className="text-orange-100 text-sm">Gerado às {horaFormatada}</p>
+                  </div>
+                </div>
+
+                {/* Resumo rápido */}
+                <div className="grid grid-cols-3 gap-3 mt-5">
+                  {[
+                    { label: '✅ OK',      value: okItems.length,  bg: 'rgba(255,255,255,0.15)' },
+                    { label: '⚠️ Baixo',   value: baixos.length,   bg: 'rgba(251,191,36,0.3)'  },
+                    { label: '🚨 Zerado',  value: zerados.length,  bg: 'rgba(248,113,113,0.3)' },
+                  ].map(s => (
+                    <div key={s.label} className="rounded-xl p-3 text-center" style={{ backgroundColor: s.bg }}>
+                      <p className="text-white font-black text-2xl">{s.value}</p>
+                      <p className="text-orange-100 text-xs font-bold mt-0.5">{s.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-5 space-y-6" style={{ backgroundColor: '#fff' }}>
+
+                {/* ── LISTA DE COMPRAS (PRIORITÁRIA) ── */}
+                {precisaComprar.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <ShoppingBag className="w-5 h-5 text-red-500" />
+                      <h2 className="font-black text-lg text-gray-900">
+                        Lista de Compras — {precisaComprar.length} iten{precisaComprar.length !== 1 ? 's' : ''}
+                      </h2>
+                    </div>
+
+                    <div className="rounded-xl overflow-hidden border-2 border-red-200">
+                      {/* Cabeçalho tabela */}
+                      <div className="grid grid-cols-12 gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider"
+                        style={{ backgroundColor: '#fee2e2', color: '#991b1b' }}>
+                        <div className="col-span-1"></div>
+                        <div className="col-span-4">Insumo</div>
+                        <div className="col-span-2 text-center">Atual</div>
+                        <div className="col-span-2 text-center">Mínimo</div>
+                        <div className="col-span-2 text-center">Comprar</div>
+                        <div className="col-span-1 text-center">✓</div>
+                      </div>
+
+                      {/* Zerados primeiro */}
+                      {zerados.length > 0 && (
+                        <>
+                          <div className="px-4 py-1.5 text-[10px] font-black uppercase tracking-widest"
+                            style={{ backgroundColor: '#fef2f2', color: '#dc2626' }}>
+                            🚨 ZERADO — URGENTE
+                          </div>
+                          {zerados.map((ins, idx) => {
+                            const deficit = ins.quantidade_minima
+                            return (
+                              <div key={ins.id}
+                                className="grid grid-cols-12 gap-2 px-4 py-3 items-center border-t border-red-100"
+                                style={{ backgroundColor: idx % 2 === 0 ? '#fff' : '#fff7f7' }}>
+                                <div className="col-span-1 text-xl">{iconeInsumo(ins.nome)}</div>
+                                <div className="col-span-4">
+                                  <p className="font-bold text-sm text-gray-900">{ins.nome}</p>
+                                  {ins.fornecedor && (
+                                    <p className="text-[10px] text-gray-400">{ins.fornecedor}</p>
+                                  )}
+                                </div>
+                                <div className="col-span-2 text-center">
+                                  <span className="font-black text-red-600 text-sm">
+                                    0 {ins.unidade}
+                                  </span>
+                                </div>
+                                <div className="col-span-2 text-center">
+                                  <span className="text-sm text-gray-500">
+                                    {ins.quantidade_minima} {ins.unidade}
+                                  </span>
+                                </div>
+                                <div className="col-span-2 text-center">
+                                  <span className="font-black text-sm px-2 py-0.5 rounded-lg"
+                                    style={{ backgroundColor: '#fecaca', color: '#991b1b' }}>
+                                    +{deficit} {ins.unidade}
+                                  </span>
+                                </div>
+                                <div className="col-span-1 text-center">
+                                  <div className="w-5 h-5 border-2 border-gray-300 rounded mx-auto" />
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </>
+                      )}
+
+                      {/* Baixos */}
+                      {baixos.length > 0 && (
+                        <>
+                          <div className="px-4 py-1.5 text-[10px] font-black uppercase tracking-widest"
+                            style={{ backgroundColor: '#fffbeb', color: '#92400e' }}>
+                            ⚠️ ABAIXO DO MÍNIMO
+                          </div>
+                          {baixos.map((ins, idx) => {
+                            const deficit = Math.ceil(ins.quantidade_minima - ins.quantidade_atual)
+                            return (
+                              <div key={ins.id}
+                                className="grid grid-cols-12 gap-2 px-4 py-3 items-center border-t border-yellow-100"
+                                style={{ backgroundColor: idx % 2 === 0 ? '#fff' : '#fffdf0' }}>
+                                <div className="col-span-1 text-xl">{iconeInsumo(ins.nome)}</div>
+                                <div className="col-span-4">
+                                  <p className="font-bold text-sm text-gray-900">{ins.nome}</p>
+                                  {ins.fornecedor && (
+                                    <p className="text-[10px] text-gray-400">{ins.fornecedor}</p>
+                                  )}
+                                </div>
+                                <div className="col-span-2 text-center">
+                                  <span className="font-bold text-sm text-yellow-700">
+                                    {ins.quantidade_atual} {ins.unidade}
+                                  </span>
+                                </div>
+                                <div className="col-span-2 text-center">
+                                  <span className="text-sm text-gray-500">
+                                    {ins.quantidade_minima} {ins.unidade}
+                                  </span>
+                                </div>
+                                <div className="col-span-2 text-center">
+                                  <span className="font-bold text-sm px-2 py-0.5 rounded-lg"
+                                    style={{ backgroundColor: '#fef3c7', color: '#92400e' }}>
+                                    +{deficit} {ins.unidade}
+                                  </span>
+                                </div>
+                                <div className="col-span-1 text-center">
+                                  <div className="w-5 h-5 border-2 border-gray-300 rounded mx-auto" />
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── ESTOQUE COMPLETO ── */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <ClipboardList className="w-5 h-5 text-gray-500" />
+                    <h2 className="font-black text-lg text-gray-900">
+                      Situação Completa do Estoque
+                    </h2>
+                  </div>
+
+                  <div className="rounded-xl overflow-hidden border border-gray-200">
+                    {/* Cabeçalho */}
+                    <div className="grid grid-cols-12 gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider"
+                      style={{ backgroundColor: '#f3f4f6', color: '#374151' }}>
+                      <div className="col-span-1"></div>
+                      <div className="col-span-5">Insumo</div>
+                      <div className="col-span-2 text-center">Qtd Atual</div>
+                      <div className="col-span-2 text-center">Mínimo</div>
+                      <div className="col-span-2 text-center">Status</div>
+                    </div>
+
+                    {insumos.length === 0 ? (
+                      <div className="p-8 text-center text-gray-400 text-sm">
+                        Nenhum insumo cadastrado
+                      </div>
+                    ) : insumos.map((ins, idx) => {
+                      const status = ins.quantidade_atual === 0 ? 'zerado'
+                        : ins.quantidade_atual <= ins.quantidade_minima ? 'baixo' : 'ok'
+                      const statusConfig = {
+                        ok:     { label: '✅ OK',      bg: '#f0fdf4', text: '#166534', rowBg: idx % 2 === 0 ? '#fff' : '#f9fafb' },
+                        baixo:  { label: '⚠️ Baixo',   bg: '#fef9c3', text: '#854d0e', rowBg: idx % 2 === 0 ? '#fff' : '#fffdf0' },
+                        zerado: { label: '🚨 Zerado',  bg: '#fee2e2', text: '#991b1b', rowBg: idx % 2 === 0 ? '#fff' : '#fff7f7' },
+                      }[status]
+
+                      return (
+                        <div key={ins.id}
+                          className="grid grid-cols-12 gap-2 px-4 py-3 items-center border-t border-gray-100"
+                          style={{ backgroundColor: statusConfig.rowBg }}>
+                          <div className="col-span-1 text-lg">{iconeInsumo(ins.nome)}</div>
+                          <div className="col-span-5">
+                            <p className="font-semibold text-sm text-gray-900">{ins.nome}</p>
+                            {ins.descricao && (
+                              <p className="text-[10px] text-gray-400">{ins.descricao}</p>
+                            )}
+                          </div>
+                          <div className="col-span-2 text-center">
+                            <span className="font-bold text-sm text-gray-800">
+                              {ins.quantidade_atual} {ins.unidade}
+                            </span>
+                          </div>
+                          <div className="col-span-2 text-center">
+                            <span className="text-sm text-gray-500">
+                              {ins.quantidade_minima} {ins.unidade}
+                            </span>
+                          </div>
+                          <div className="col-span-2 text-center">
+                            <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg"
+                              style={{ backgroundColor: statusConfig.bg, color: statusConfig.text }}>
+                              {statusConfig.label}
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Rodapé imprimível */}
+                <div className="border-t-2 border-gray-200 pt-4 mt-4">
+                  <div className="flex items-center justify-between text-xs text-gray-400">
+                    <p>Sistema Império Pastéis — Balanço gerado em {dataFormatada} às {horaFormatada}</p>
+                    <p>Conferido por: ___________________</p>
+                  </div>
+                  <div className="mt-3 p-3 rounded-lg text-xs text-gray-500 bg-gray-50">
+                    <strong>Observações:</strong>{' '}
+                    <span className="inline-block w-full border-b border-gray-300 mt-1">
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    </span>
+                  </div>
+                </div>
+
+                {/* Botões de ação (não imprimem) */}
+                <div className="no-print flex items-center gap-3 mt-2">
+                  <button
+                    onClick={() => setShowBalanco(false)}
+                    className="btn-secondary flex-1 py-3"
+                  >
+                    <X className="w-4 h-4" />
+                    Fechar
+                  </button>
+                  <button
+                    onClick={() => window.print()}
+                    className="btn-primary flex-1 py-3"
+                    style={{ backgroundColor: '#f97316' }}
+                  >
+                    <Printer className="w-4 h-4" />
+                    Imprimir Balanço
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }
