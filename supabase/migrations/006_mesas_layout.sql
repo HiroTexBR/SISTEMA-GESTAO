@@ -6,6 +6,8 @@
 -- 1. Limpa tabelas filhas para liberar as foreign keys
 --    (remove itens de pedido → pedidos → itens de comanda → pagamentos → comandas → mesas)
 
+DELETE FROM testes_impressora;
+
 DELETE FROM fila_impressao;
 
 DELETE FROM pedido_itens
