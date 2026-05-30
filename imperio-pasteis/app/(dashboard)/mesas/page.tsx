@@ -18,6 +18,24 @@ const STATUS_STYLE: Record<string, { dot: string; badge: string; label: string }
   inativa:             { dot: 'var(--color-status-inactive)', badge: 'rgba(75,75,90,0.2)',     label: 'Inativa'      },
 }
 
+/** Extrai a label curta da descrição: "F1 — Fora" → "F1" */
+function getMesaLabel(mesa: Mesa): string {
+  if (mesa.descricao) {
+    const match = mesa.descricao.match(/^([A-Z]\d+)/)
+    if (match) return match[1]
+  }
+  return String(mesa.numero)
+}
+
+/** Extrai a seção: "F1 — Fora" → "Fora" */
+function getMesaSecao(mesa: Mesa): string {
+  if (mesa.descricao) {
+    const match = mesa.descricao.match(/—\s*(.+)$/)
+    if (match) return match[1].trim()
+  }
+  return mesa.descricao || ''
+}
+
 export default function MesasPage() {
   const router = useRouter()
   const supabase = createClient()
@@ -68,9 +86,14 @@ export default function MesasPage() {
   }
 
   const mesasFiltradas = mesas.filter(m => {
+    const label = getMesaLabel(m).toLowerCase()
+    const secao = getMesaSecao(m).toLowerCase()
+    const q = busca.toLowerCase()
     const matchBusca = busca === '' ||
-      m.numero.toString().includes(busca) ||
-      m.descricao?.toLowerCase().includes(busca.toLowerCase())
+      label.includes(q) ||
+      secao.includes(q) ||
+      m.numero.toString().includes(q) ||
+      m.descricao?.toLowerCase().includes(q)
     const matchStatus = filtroStatus === 'todos' || m.status === filtroStatus
     return matchBusca && matchStatus
   })
@@ -190,12 +213,12 @@ function MesaCard({ mesa, onClick }: { mesa: Mesa & { comanda?: Comanda }, onCli
       <div className="h-1" style={{ backgroundColor: st.dot }} />
 
       <div className="p-4">
-        {/* Número + dot */}
+        {/* Label + dot */}
         <div className="flex items-center justify-between mb-3">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--color-text-muted)' }}>Mesa</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--color-text-muted)' }}>{getMesaSecao(mesa) || 'Mesa'}</p>
             <p className="font-display font-bold text-3xl leading-none mt-0.5" style={{ color: 'var(--color-text-main)' }}>
-              {mesa.numero}
+              {getMesaLabel(mesa)}
             </p>
           </div>
           <div

@@ -337,12 +337,12 @@ export default function ComandaPage() {
         </button>
         <div className="flex-1">
           <h1 className="font-display font-bold text-base tracking-tight" style={{ color: S.main }}>
-            Mesa {mesa?.numero}
+            {mesa?.descricao ? mesa.descricao.match(/^([A-Z]\d+)/)?.[1] || mesa.numero : mesa?.numero}
           </h1>
           {comanda ? (
-            <p className="text-xs" style={{ color: S.muted }}>Comanda #{String(comanda.numero).padStart(6, '0')}</p>
+            <p className="text-xs" style={{ color: S.muted }}>Comanda #{String(comanda.numero).padStart(6, '0')} · {mesa?.descricao?.replace(/^[A-Z]\d+\s*—\s*/, '') || ''}</p>
           ) : (
-            <p className="text-xs" style={{ color: S.muted }}>Mesa livre</p>
+            <p className="text-xs" style={{ color: S.muted }}>{mesa?.descricao || 'Mesa livre'}</p>
           )}
         </div>
         {comanda && (
