@@ -3,7 +3,26 @@
 -- F1-F8 (Fora/Varanda), M1-M8 (Dentro/Salão), D1-D4 (Delivery/Viagem)
 -- =====================================================
 
--- Remove mesas antigas (seed inicial)
+-- 1. Limpa tabelas filhas para liberar as foreign keys
+--    (remove itens de pedido → pedidos → itens de comanda → pagamentos → comandas → mesas)
+
+DELETE FROM fila_impressao;
+
+DELETE FROM pedido_itens
+WHERE pedido_producao_id IN (SELECT id FROM pedidos_producao);
+
+DELETE FROM pedidos_producao;
+
+DELETE FROM comanda_item_adicionais
+WHERE comanda_item_id IN (SELECT id FROM comanda_itens);
+
+DELETE FROM comanda_itens;
+
+DELETE FROM pagamentos;
+
+DELETE FROM comandas;
+
+-- 2. Agora sim remove as mesas antigas
 DELETE FROM mesas;
 
 -- Reseta a sequência de número se necessário
