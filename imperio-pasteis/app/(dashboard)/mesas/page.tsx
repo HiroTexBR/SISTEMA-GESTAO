@@ -76,7 +76,7 @@ export default function MesasPage() {
     const channel = supabase
       .channel('mesas-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'mesas' }, carregarMesas)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'comandas' }, carregarMesas)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'comandas', filter: 'status=in.(aberta,aguardando_pagamento,fechada)' }, carregarMesas)
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [carregarMesas])

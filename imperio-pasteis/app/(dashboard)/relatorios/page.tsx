@@ -44,7 +44,7 @@ export default function RelatoriosPage() {
       .from('comandas').select('id, valor_final, criado_em').eq('status', 'finalizada').gte('criado_em', isoInicio)
 
     let total = 0, dinheiro = 0, pix = 0, cartao = 0
-    pagamentos?.forEach(p => {
+    pagamentos?.forEach((p: any) => {
       total += p.valor
       if (p.forma_pagamento === 'dinheiro') dinheiro += p.valor
       if (p.forma_pagamento === 'pix') pix += p.valor
@@ -62,12 +62,12 @@ export default function RelatoriosPage() {
     }
     if (periodo === 'hoje') {
       for (let i = 8; i <= 23; i++) agrupadoDia[`${i}h`] = 0
-      pagamentos?.forEach(p => {
+      pagamentos?.forEach((p: any) => {
         const h = new Date(p.criado_em).getHours()
         if (agrupadoDia[`${h}h`] !== undefined) agrupadoDia[`${h}h`] += p.valor
       })
     } else {
-      pagamentos?.forEach(p => {
+      pagamentos?.forEach((p: any) => {
         const dia = new Date(p.criado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
         if (agrupadoDia[dia] !== undefined) agrupadoDia[dia] += p.valor
       })

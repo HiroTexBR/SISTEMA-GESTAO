@@ -55,10 +55,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [online, setOnline] = useState(true)
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then((res: any) => {
+      const user = res?.data?.user
       if (!user) { router.push('/login'); return }
       supabase.from('usuarios').select('*').eq('id', user.id).single()
-        .then(({ data }) => setUsuario(data))
+        .then((res: any) => setUsuario(res?.data))
     })
 
     const handleOnline = () => { setOnline(true); toast.success('Conexão restaurada') }

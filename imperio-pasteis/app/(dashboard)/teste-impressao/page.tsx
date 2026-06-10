@@ -89,7 +89,7 @@ export default function TesteImpressaoPage() {
     if (imps) {
       setImpressoras(imps)
       if (!impressoraSelecionada && imps.length > 0) {
-        const prod = imps.find(i => i.setor === 'producao') || imps[0]
+        const prod = imps.find((i: any) => i.setor === 'producao') || imps[0]
         setImpressoraSelecionada(prod)
         setIp(prod.endereco_ip || '192.168.0.100')
         setPorta(prod.porta || 9100)

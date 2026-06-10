@@ -11,6 +11,7 @@ import {
   MessageSquare, CheckCircle2, AlertCircle, Receipt, Tag
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useEffect as useEffectOnce } from 'react'
 
 const S = {
   bg: 'var(--color-surface-bg)', card: 'var(--color-surface-card)',
@@ -107,7 +108,7 @@ export default function ComandaPage() {
     if (!userExists) {
       await supabase.from('usuarios').insert({
         id: user.id, nome: user.email?.split('@')[0] || 'Usuário',
-        email: user.email, cargo: 'admin', ativo: true,
+        email: user.email, cargo: 'garcom', ativo: true,
       })
     }
 
@@ -318,6 +319,15 @@ export default function ComandaPage() {
     setPasso('lista')
   }
 
+  // Fechar modal com ESC
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape' && showCardapio) fecharModal()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [showCardapio])
+
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen">
       <Loader2 className="w-8 h-8 animate-spin" style={{ color: S.accent }} />
@@ -410,7 +420,12 @@ export default function ComandaPage() {
               </button>
             </div>
             <button
-              onClick={() => router.push(`/caixa?comanda=${comanda.id}`)}
+              onClick={() => {
+                if (itensNaoEnviados.length > 0) {
+                  if (!confirm(`Atenção! Existem ${itensNaoEnviados.length} item(ns) NÃO enviado(s) para a produção. Deseja fechar a conta mesmo assim?`)) return
+                }
+                router.push(`/caixa?comanda=${comanda.id}`)
+              }}
               className="w-full flex items-center justify-center gap-2 py-3 rounded-lg font-bold text-sm transition-all"
               style={{ border: `1.5px solid ${S.green}`, color: S.green }}
             >

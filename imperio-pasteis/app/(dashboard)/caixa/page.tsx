@@ -76,11 +76,18 @@ function CaixaContent() {
   }, [])
 
   useEffect(() => {
-    carregarComandas()
-    const comandaId = searchParams.get('comanda')
-    if (comandaId) setTimeout(() => selecionarComanda(comandaId), 500)
-    const interval = setInterval(carregarComandas, 15000)
-    return () => clearInterval(interval)
+    const init = async () => {
+      await carregarComandas()
+      const comandaId = searchParams.get('comanda')
+      if (comandaId) selecionarComanda(comandaId)
+    }
+    init()
+
+    const channel = supabase
+      .channel('caixa-comandas')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'comandas' }, carregarComandas)
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
   }, [carregarComandas])
 
   async function selecionarComanda(comandaId: string) {
@@ -296,7 +303,7 @@ function CaixaContent() {
             <div className="flex items-center justify-between">
               <span className="font-bold" style={{ color: S.main }}>Total</span>
               <span className="font-display font-bold text-xl" style={{ color: S.green }}>
-                {formatCurrency(comandaSelecionada.total || 0)}
+                {formatCurrency(total)}
               </span>
             </div>
             <button
@@ -319,9 +326,10 @@ function CaixaContent() {
 
       {/* ── MODAL DE PAGAMENTO ── */}
       {showPagamento && comandaSelecionada && typeof document !== 'undefined' && createPortal(
-        <div className="fixed inset-0 bg-black/70 z-[100] flex items-end lg:items-center justify-center animate-fade-in">
+        <div className="fixed inset-0 bg-black/70 z-[100] flex items-end lg:items-center justify-center animate-fade-in" onClick={() => setShowPagamento(false)}>
           <div
             className="w-full lg:max-w-md max-h-[90vh] overflow-y-auto"
+            onClick={e => e.stopPropagation()}
             style={{
               backgroundColor: S.card,
               borderRadius: '12px 12px 0 0',

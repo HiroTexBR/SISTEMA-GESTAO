@@ -58,9 +58,30 @@ export default function DashboardPage() {
         }, {})
         setProdutosMaisVendidos(
           Object.entries(agrupado)
-            .map(([nome, v]) => ({ nome, qtd: v.qtd, total: v.total }))
+            .map(([nome, v]: [string, any]) => ({ nome, qtd: v.qtd, total: v.total }))
             .sort((a, b) => b.qtd - a.qtd)
             .slice(0, 5)
+        )
+      }
+
+      const { data: comandasDia } = await supabase
+        .from('comandas')
+        .select('aberta_em, total, status')
+        .gte('aberta_em', hoje)
+        .neq('status', 'cancelada')
+        
+      if (comandasDia) {
+        const porHora = comandasDia.reduce((acc: Record<string, number>, c: any) => {
+          if (!c.aberta_em) return acc
+          const h = new Date(c.aberta_em).getHours().toString().padStart(2, '0') + ':00'
+          acc[h] = (acc[h] || 0) + Number(c.total || 0)
+          return acc
+        }, {})
+        
+        setVendasHora(
+          Object.entries(porHora)
+            .map(([hora, total]) => ({ hora, total: Number(total) }))
+            .sort((a, b) => a.hora.localeCompare(b.hora))
         )
       }
 
@@ -74,7 +95,9 @@ export default function DashboardPage() {
 
   useEffect(() => {
     carregarDados()
-    const interval = setInterval(carregarDados, 30000)
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') carregarDados()
+    }, 30000)
     return () => clearInterval(interval)
   }, [carregarDados])
 
@@ -95,6 +118,7 @@ export default function DashboardPage() {
         </div>
         <button
           onClick={carregarDados}
+          aria-label="Atualizar dados"
           className="p-2.5 rounded-lg transition-colors"
           style={{ backgroundColor: 'var(--color-surface-card)', color: 'var(--color-text-muted)' }}
         >

@@ -12,7 +12,7 @@ import type { Impressora } from '@/lib/types'
 const FORM_INICIAL = {
   nome: '',
   setor: 'producao' as Impressora['setor'],
-  tipo_conexao: 'rede' as Impressora['tipo_conexao'],
+  tipo_conexao: 'ethernet' as Impressora['tipo_conexao'],
   endereco_ip: '',
   porta: '9100',
   largura_papel: '80mm' as Impressora['largura_papel'],
@@ -115,7 +115,7 @@ export default function ImpressorasPage() {
         </div>
         <button
           onClick={abrirNovo}
-          className="flex items-center gap-2 bg-brand-accent hover:bg-[#D15C39] text-white font-bold px-5 py-3 rounded-xl shadow-glow active:scale-95 transition-all"
+          className="flex items-center gap-2 bg-[var(--color-brand-accent)] hover:bg-[var(--color-brand-hover)] text-white font-bold px-5 py-3 rounded-xl shadow-[var(--shadow-glow)] active:scale-95 transition-all"
         >
           <Plus className="w-5 h-5" />
           <span className="hidden sm:inline">Nova Impressora</span>
@@ -137,13 +137,13 @@ export default function ImpressorasPage() {
             <div key={imp.id} className={`glass-card p-6 ${imp.ativa ? '' : 'opacity-50 grayscale'}`}>
               <div className="flex justify-between items-start mb-6">
                 <div className="flex items-center gap-4">
-                  <div className={`p-4 rounded-2xl ${imp.status === 'online' ? 'bg-[#739E82]/10 text-[#739E82]' : imp.status === 'erro' ? 'bg-[#D96C6C]/10 text-[#D96C6C]' : 'bg-surface-border text-text-muted'}`}>
+                  <div className={`p-4 rounded-2xl ${imp.status === 'online' ? 'bg-[var(--color-status-free)]/10 text-[var(--color-status-free)]' : imp.status === 'erro' ? 'bg-[var(--color-status-busy)]/10 text-[var(--color-status-busy)]' : 'bg-[var(--color-surface-border)] text-[var(--color-text-muted)]'}`}>
                     <Printer className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-text-main text-lg flex items-center gap-3">
+                    <h3 className="font-bold text-[var(--color-text-main)] text-lg flex items-center gap-3">
                       {imp.nome}
-                      {imp.modo_teste && <span className="text-[10px] bg-[#D4A373]/10 text-[#D4A373] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">Simulação</span>}
+                      {imp.modo_teste && <span className="text-[10px] bg-[var(--color-status-wait)]/10 text-[var(--color-status-wait)] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">Simulação</span>}
                     </h3>
                     <p className="text-sm text-text-muted flex items-center gap-2 mt-1">
                       <Wifi className="w-3.5 h-3.5" /> {imp.endereco_ip}:{imp.porta}
@@ -163,11 +163,11 @@ export default function ImpressorasPage() {
                 <Badge label="Imp. Auto" active={imp.impressao_automatica} />
               </div>
 
-              <div className="flex items-center justify-end gap-3 border-t border-surface-border pt-5">
-                <button onClick={() => abrirEditar(imp)} className="p-2 hover:bg-surface-border text-text-muted hover:text-text-main rounded-xl transition-all">
+              <div className="flex items-center justify-end gap-3 border-t border-[var(--color-surface-border)] pt-5">
+                <button onClick={() => abrirEditar(imp)} className="p-2 hover:bg-[var(--color-surface-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] rounded-xl transition-all">
                   <Edit2 className="w-4 h-4" />
                 </button>
-                <button onClick={() => excluir(imp)} className="p-2 hover:bg-[#D96C6C]/10 text-[#D96C6C] rounded-xl transition-all">
+                <button onClick={() => excluir(imp)} className="p-2 hover:bg-[var(--color-status-busy)]/10 text-[var(--color-status-busy)] rounded-xl transition-all">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
@@ -258,13 +258,13 @@ export default function ImpressorasPage() {
             </div>
 
             <div className="flex gap-4 pt-4">
-              <button onClick={() => setShowForm(false)} className="flex-1 bg-surface-bg border border-surface-border hover:bg-surface-border font-bold py-4 rounded-xl text-text-main transition-colors">
+              <button onClick={() => setShowForm(false)} className="flex-1 bg-[var(--color-surface-bg)] border border-[var(--color-surface-border)] hover:bg-[var(--color-surface-border)] font-bold py-4 rounded-xl text-[var(--color-text-main)] transition-colors">
                 Cancelar
               </button>
               <button
                 onClick={salvar}
                 disabled={salvando}
-                className="flex-1 bg-brand-accent hover:bg-[#D15C39] text-white font-bold py-4 rounded-xl shadow-glow flex items-center justify-center gap-2 transition-all"
+                className="flex-1 bg-[var(--color-brand-accent)] hover:bg-[var(--color-brand-hover)] text-white font-bold py-4 rounded-xl shadow-[var(--shadow-glow)] flex items-center justify-center gap-2 transition-all"
               >
                 {salvando ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
                 Salvar Impressora

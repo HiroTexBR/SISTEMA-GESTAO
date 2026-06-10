@@ -39,6 +39,12 @@ export default function ProducaoPage() {
       .channel('producao-pedidos')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos_producao' }, () => {
         carregarPedidos()
+        // Notificação sonora + vibração
+        try {
+          const audio = new Audio('/notification.mp3')
+          audio.volume = 0.6
+          audio.play().catch(() => {})
+        } catch {}
         if (typeof window !== 'undefined' && 'vibrate' in navigator) navigator.vibrate([200, 100, 200])
       })
       .subscribe()
@@ -106,6 +112,7 @@ export default function ProducaoPage() {
         )}
         <button
           onClick={carregarPedidos}
+          aria-label="Atualizar pedidos"
           className="p-2.5 rounded-lg transition-colors"
           style={{ backgroundColor: 'var(--color-surface-card)', color: 'var(--color-text-muted)' }}
         >

@@ -246,5 +246,5 @@ body {
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 16px); }
 .no-select   { user-select: none; }
 
-/* Touch targets mínimos */
-button, a, [role="button"] { min-height: 44px; }
+/* Touch targets mínimos — apenas botões de ação */
+.btn-primary, .btn-secondary, button[type="submit"] { min-height: 44px; }
