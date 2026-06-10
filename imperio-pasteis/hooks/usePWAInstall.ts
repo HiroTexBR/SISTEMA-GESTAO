@@ -51,15 +51,13 @@ export function usePWAInstall() {
 
     // Service Worker Registration
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(registration => {
-            console.log('Service Worker registrado com sucesso:', registration.scope)
-          })
-          .catch(error => {
-            console.error('Falha ao registrar Service Worker:', error)
-          })
-      })
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => {
+          console.log('Service Worker registrado com sucesso:', registration.scope)
+        })
+        .catch(error => {
+          console.error('Falha ao registrar Service Worker:', error)
+        })
     }
 
     return () => {
