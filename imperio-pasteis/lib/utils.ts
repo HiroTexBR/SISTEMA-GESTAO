@@ -126,11 +126,9 @@ export function formatMesaName(numero: number | string | undefined | null): stri
   const n = parseInt(numStr, 10)
   const unidade = String(n).slice(-2).padStart(2, '0')
   
-  if (n >= 100 && n < 200) return `Salão ${unidade}`
-  if (n >= 200 && n < 300) return `Varanda ${unidade}`
-  if (n >= 300 && n < 400) return `Kids ${unidade}`
-  if (n >= 400 && n < 500) return `Balcão ${unidade}`
-  if (n >= 500 && n < 600) return `Delivery ${unidade}`
+  if (n >= 100 && n < 200) return `Fora ${unidade}`
+  if (n >= 200 && n < 300) return `Dentro ${unidade}`
+  if (n >= 300 && n < 400) return `Delivery ${unidade}`
   
   return `Mesa ${unidade}`
 }
