@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { PedidoProducao } from '@/lib/types'
-import { formatTime, isAtrasado } from '@/lib/utils'
+import { formatTime, isAtrasado, formatMesaName } from '@/lib/utils'
 import {
   ChefHat, Clock, CheckCircle2, AlertTriangle,
   RefreshCw, Flame, Loader2
@@ -202,7 +202,7 @@ function PedidoCard({ pedido, atualizando, onAtualizar }: {
           <div>
             <div className="flex items-center gap-2">
               <span className="font-display font-bold text-xl" style={{ color: 'var(--color-text-main)' }}>
-                Mesa {pedido.mesa_numero}
+                {formatMesaName(pedido.mesa_numero)}
               </span>
               {atrasado && <Flame className="w-4 h-4" style={{ color: 'var(--color-status-busy)' }} />}
             </div>

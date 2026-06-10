@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { formatCurrency, formatTime } from '@/lib/utils'
+import { formatCurrency, formatTime, formatMesaName } from '@/lib/utils'
 import type { DashboardResumo, PedidoProducao } from '@/lib/types'
 import {
   TrendingUp, ShoppingBag, Receipt, Users, Printer,
@@ -223,7 +223,7 @@ export default function DashboardPage() {
                 />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold" style={{ color: 'var(--color-text-main)' }}>
-                    Mesa {p.mesa_numero} <span style={{ color: 'var(--color-text-muted)', fontWeight: 400 }}>· #{p.numero}</span>
+                    {formatMesaName(p.mesa_numero)} <span style={{ color: 'var(--color-text-muted)', fontWeight: 400 }}>· #{p.numero}</span>
                   </p>
                   <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{p.garcom_nome}</p>
                 </div>

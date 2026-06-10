@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Comanda, ComandaItem } from '@/lib/types'
-import { formatCurrency, formatDateTime } from '@/lib/utils'
+import { formatCurrency, formatDateTime, formatMesaName } from '@/lib/utils'
 import {
   CreditCard, Search, Receipt, CheckCircle2,
   Smartphone, ChevronRight, Loader2, X,
@@ -146,7 +146,7 @@ function CaixaContent() {
   function gerarRecibo(comanda: Comanda, itens: ComandaItem[], total: number, forma: string, troco: number): string {
     const nome = process.env.NEXT_PUBLIC_NOME_ESTABELECIMENTO || 'IMPÉRIO PASTÉIS'
     return [
-      '', `        ${nome}`, `      Mesa ${(comanda.mesa as any)?.numero || '?'}`,
+      '', `        ${nome}`, `      ${formatMesaName((comanda.mesa as any)?.numero)}`,
       `Comanda #${String(comanda.numero).padStart(6, '0')}`, '--------------------------------',
       ...itens.map(i => `${i.quantidade}x ${i.nome_produto} - ${formatCurrency(i.total)}`),
       '--------------------------------', `TOTAL: ${formatCurrency(total)}`,
@@ -220,11 +220,11 @@ function CaixaContent() {
                 className="w-11 h-11 rounded-lg flex items-center justify-center font-display font-black text-lg flex-shrink-0 text-white"
                 style={{ backgroundColor: S.accent }}
               >
-                {(comanda.mesa as any)?.numero || '?'}
+                {String((comanda.mesa as any)?.numero || '?').slice(-2)}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-sm" style={{ color: S.main }}>
-                  Mesa {(comanda.mesa as any)?.numero || '?'}
+                  {formatMesaName((comanda.mesa as any)?.numero)}
                 </p>
                 <p className="text-xs truncate" style={{ color: S.muted }}>
                   #{String(comanda.numero).padStart(6, '0')} · {(comanda.garcom as any)?.nome || '?'}
@@ -255,7 +255,7 @@ function CaixaContent() {
             </button>
             <div className="flex-1">
               <h2 className="font-display font-bold text-base" style={{ color: S.main }}>
-                Mesa {(comandaSelecionada.mesa as any)?.numero}
+                {formatMesaName((comandaSelecionada.mesa as any)?.numero)}
               </h2>
               <p className="text-xs" style={{ color: S.muted }}>
                 #{String(comandaSelecionada.numero).padStart(6, '0')} · {formatDateTime(comandaSelecionada.aberta_em)}

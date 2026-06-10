@@ -118,3 +118,19 @@ export function isAtrasado(criadoEm: string, minutosLimite = 20): boolean {
   const diff = (Date.now() - new Date(criadoEm).getTime()) / 60000
   return diff > minutosLimite
 }
+
+export function formatMesaName(numero: number | string | undefined | null): string {
+  if (!numero) return 'Mesa ?'
+  const numStr = String(numero).replace(/\D/g, '')
+  if (!numStr) return `Mesa ${numero}`
+  const n = parseInt(numStr, 10)
+  const unidade = String(n).slice(-2).padStart(2, '0')
+  
+  if (n >= 100 && n < 200) return `Salão ${unidade}`
+  if (n >= 200 && n < 300) return `Varanda ${unidade}`
+  if (n >= 300 && n < 400) return `Kids ${unidade}`
+  if (n >= 400 && n < 500) return `Balcão ${unidade}`
+  if (n >= 500 && n < 600) return `Delivery ${unidade}`
+  
+  return `Mesa ${unidade}`
+}
