@@ -86,20 +86,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* ── SIDEBAR — desktop ── */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-60 flex flex-col
+        fixed inset-y-0 left-0 z-50 w-64 flex flex-col
         transition-transform duration-300 ease-in-out
         lg:relative lg:translate-x-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `} style={{ backgroundColor: 'var(--color-surface-card)', borderRight: '1px solid var(--color-surface-border)' }}>
 
         {/* Logo */}
-        <div className="flex items-center gap-3 px-5 py-3 h-auto min-h-[64px] flex-shrink-0" style={{ borderBottom: '1px solid var(--color-surface-border)' }}>
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-xl" style={{ background: 'var(--color-surface-bg)', border: '1px solid var(--color-surface-border)' }}>
+        <div className="flex items-center gap-3 px-5 py-4 h-auto min-h-[72px] flex-shrink-0" style={{ borderBottom: '1px solid var(--color-surface-border)' }}>
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl" style={{ background: 'var(--color-surface-bg)', border: '1px solid var(--color-surface-border)' }}>
             👑
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-display font-bold text-[13px] leading-tight tracking-tight" style={{ color: 'var(--color-text-main)' }}>IMPÉRIO DOS PASTÉIS</p>
-            <p className="text-xs capitalize font-medium" style={{ color: 'var(--color-brand-accent)' }}>{cargo}</p>
+            <p className="font-display font-bold text-[15px] leading-tight tracking-tight" style={{ color: 'var(--color-text-main)' }}>IMPÉRIO DOS PASTÉIS</p>
+            <p className="text-[13px] capitalize font-medium" style={{ color: 'var(--color-brand-accent)' }}>{cargo}</p>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
@@ -119,13 +119,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 key={href}
                 href={href}
                 onClick={() => setSidebarOpen(false)}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium transition-all"
                 style={{
                   backgroundColor: active ? 'rgba(249,115,22,0.1)' : 'transparent',
                   color: active ? 'var(--color-brand-accent)' : 'var(--color-text-muted)',
                 }}
               >
-                <Icon className="w-4 h-4 flex-shrink-0" />
+                <Icon className="w-5 h-5 flex-shrink-0" />
                 {label}
               </Link>
             )
@@ -133,34 +133,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </nav>
 
         {/* Footer */}
-        <div className="px-3 pb-4 space-y-1" style={{ borderTop: '1px solid var(--color-surface-border)', paddingTop: '12px' }}>
+        <div className="px-4 pb-5 space-y-2" style={{ borderTop: '1px solid var(--color-surface-border)', paddingTop: '16px' }}>
           {/* Status online */}
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold"
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] font-bold"
             style={{ color: online ? 'var(--color-status-free)' : 'var(--color-status-busy)' }}>
-            {online ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5" />}
+            {online ? <Wifi className="w-4 h-4" /> : <WifiOff className="w-4 h-4" />}
             {online ? 'Online' : 'Offline'}
           </div>
 
           {/* Usuário */}
           {usuario && (
-            <div className="flex items-center gap-2.5 px-3 py-2">
-              <div className="w-7 h-7 rounded-md flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+            <div className="flex items-center gap-3 px-3 py-2">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
                 style={{ background: 'var(--color-brand-accent)' }}>
                 {usuario.nome[0].toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold truncate" style={{ color: 'var(--color-text-main)' }}>{usuario.nome}</p>
-                <p className="text-[10px] capitalize" style={{ color: 'var(--color-text-muted)' }}>{usuario.cargo}</p>
+                <p className="text-[14px] font-semibold truncate" style={{ color: 'var(--color-text-main)' }}>{usuario.nome}</p>
+                <p className="text-xs capitalize" style={{ color: 'var(--color-text-muted)' }}>{usuario.cargo}</p>
               </div>
             </div>
           )}
 
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium transition-all"
             style={{ color: 'var(--color-status-busy)' }}
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-5 h-5" />
             Sair
           </button>
         </div>
