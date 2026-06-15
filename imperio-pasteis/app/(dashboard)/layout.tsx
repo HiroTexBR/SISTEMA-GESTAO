@@ -14,11 +14,11 @@ import { toast } from 'sonner'
 
 const NAV_ITEMS = [
   { href: '/', icon: LayoutDashboard, label: 'Dashboard', cargos: ['admin'] },
-  { href: '/mesas', icon: UtensilsCrossed, label: 'Mesas', cargos: ['admin', 'garcom', 'caixa'] },
-  { href: '/producao', icon: ChefHat, label: 'Produção', cargos: ['admin', 'producao'] },
-  { href: '/caixa', icon: CreditCard, label: 'Caixa', cargos: ['admin', 'caixa', 'garcom'] },
+  { href: '/mesas', icon: UtensilsCrossed, label: 'Mesas', cargos: ['admin', 'garcom', 'caixa', 'producao'] },
+  { href: '/producao', icon: ChefHat, label: 'Produção', cargos: ['admin', 'producao', 'garcom'] },
+  { href: '/caixa', icon: CreditCard, label: 'Caixa', cargos: ['admin', 'caixa', 'garcom', 'producao'] },
   { href: '/cardapio', icon: Package, label: 'Cardápio', cargos: ['admin'] },
-  { href: '/estoque', icon: Package, label: 'Estoque', cargos: ['admin', 'garcom'] },
+  { href: '/estoque', icon: Package, label: 'Estoque', cargos: ['admin', 'garcom', 'producao'] },
   { href: '/funcionarios', icon: Users, label: 'Equipe', cargos: ['admin'] },
   { href: '/relatorios', icon: BarChart3, label: 'Relatórios', cargos: ['admin', 'caixa'] },
   { href: '/impressoras', icon: Printer, label: 'Impressoras', cargos: ['admin'] },
@@ -36,6 +36,7 @@ const BOTTOM_NAV_ITEMS: Record<string, typeof NAV_ITEMS> = {
   garcom: [
     { href: '/caixa', icon: CreditCard, label: 'Caixa', cargos: ['garcom'] },
     { href: '/mesas', icon: UtensilsCrossed, label: 'Mesas', cargos: ['garcom'] },
+    { href: '/producao', icon: ChefHat, label: 'Produção', cargos: ['garcom'] },
     { href: '/estoque', icon: Package, label: 'Estoque', cargos: ['garcom'] },
   ],
   caixa: [
@@ -44,7 +45,10 @@ const BOTTOM_NAV_ITEMS: Record<string, typeof NAV_ITEMS> = {
     { href: '/relatorios', icon: BarChart3, label: 'Relatórios', cargos: ['caixa'] },
   ],
   producao: [
+    { href: '/caixa', icon: CreditCard, label: 'Caixa', cargos: ['producao'] },
+    { href: '/mesas', icon: UtensilsCrossed, label: 'Mesas', cargos: ['producao'] },
     { href: '/producao', icon: ChefHat, label: 'Produção', cargos: ['producao'] },
+    { href: '/estoque', icon: Package, label: 'Estoque', cargos: ['producao'] },
   ],
 }
 
