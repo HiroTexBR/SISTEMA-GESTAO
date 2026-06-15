@@ -32,19 +32,25 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
 // =====================================================
-// Carregar biblioteca USB (opcional — só falha se tentar usar)
+// Suporte a impressora USB via porta Windows (ex: USB001)
 // =====================================================
-let escpos = null
-let EscPosUSB = null
+const { execSync } = require('child_process')
+const fs = require('fs')
+const os = require('os')
+const path = require('path')
 
-try {
-  escpos = require('escpos')
-  escpos.USB = require('escpos-usb')
-  EscPosUSB = escpos.USB
-  console.log('✅ Biblioteca escpos-usb carregada com sucesso')
-} catch (e) {
-  console.warn('⚠️  escpos-usb não disponível — impressão USB desabilitada:', e.message)
+// Detectar a porta USB da impressora automaticamente
+function detectarPortaUSBWindows() {
+  try {
+    const saida = execSync('powershell -Command "Get-PrinterPort | Select-Object Name | Format-List"', { encoding: 'utf8' })
+    const match = saida.match(/Name\s*:\s*(USB\d+)/i)
+    if (match) return match[1]
+  } catch (_) {}
+  return 'USB001' // fallback padrão
 }
+
+const PORTA_USB_WINDOWS = detectarPortaUSBWindows()
+console.log(`📌 Porta USB Windows detectada: ${PORTA_USB_WINDOWS}`)
 
 console.log(`
 ╔══════════════════════════════════════════╗
@@ -113,9 +119,14 @@ async function processarItem(item) {
     return
   }
 
-  if (tipo_conexao === 'usb' && !EscPosUSB) {
-    await marcarFalha(id, 'Biblioteca escpos-usb não carregada — rode "npm install" no gateway')
-    return
+  if (tipo_conexao === 'usb') {
+    // Verificar se porta USB existe no sistema
+    try {
+      execSync(`powershell -Command "Get-PrinterPort -Name ${PORTA_USB_WINDOWS} -ErrorAction Stop"`, { stdio: 'ignore' })
+    } catch (_) {
+      await marcarFalha(id, `Porta USB Windows '${PORTA_USB_WINDOWS}' não encontrada. Verifique se a impressora está conectada.`)
+      return
+    }
   }
 
   // Marcar como imprimindo
@@ -165,57 +176,42 @@ async function processarItem(item) {
 }
 
 // =====================================================
-// Enviar via USB — usa escpos + escpos-usb
+// Enviar via USB — Windows nativo (copy /b para porta USB)
 // =====================================================
 function enviarParaImpressoraUSB(conteudo, corteAutomatico) {
   return new Promise((resolve, reject) => {
-    if (!EscPosUSB) {
-      return reject(new Error('escpos-usb não disponível'))
-    }
-
-    let device
     try {
-      // Busca a primeira impressora USB ESC/POS disponível
-      const devices = EscPosUSB.findPrinter()
-      if (!devices || devices.length === 0) {
-        return reject(new Error('Nenhuma impressora USB encontrada. Verifique o cabo USB e o driver.'))
-      }
-      device = new EscPosUSB(devices[0])
-    } catch (e) {
-      return reject(new Error(`Erro ao localizar impressora USB: ${e.message}`))
-    }
+      const ESC = 0x1B
+      const GS  = 0x1D
+      const cmdInit    = Buffer.from([ESC, 0x40])
+      const cmdCharset = Buffer.from([ESC, 0x74, 0x02])
+      const cmdCorte   = corteAutomatico
+        ? Buffer.from([GS, 0x56, 0x41, 0x00])
+        : Buffer.alloc(0)
 
-    device.open(function (err) {
-      if (err) {
-        return reject(new Error(`Erro ao abrir impressora USB: ${err.message}`))
-      }
+      const payload = Buffer.concat([
+        cmdInit,
+        cmdCharset,
+        Buffer.from(conteudo, 'latin1'),
+        Buffer.from('\r\n\r\n\r\n'),
+        cmdCorte,
+      ])
 
-      const printer = new escpos.Printer(device)
+      // Salvar em arquivo temporário e copiar para porta USB (confiável no Windows)
+      const tmpFile = path.join(os.tmpdir(), `cupom_${Date.now()}.bin`)
+      fs.writeFileSync(tmpFile, payload)
 
-      // Montar saída linha por linha
-      const linhas = conteudo.split('\n')
-
-      let p = printer
-        .font('a')
-        .align('lt')
-        .style('normal')
-        .size(1, 1)
-
-      for (const linha of linhas) {
-        p = p.text(linha)
-      }
-
-      // Avanço de papel antes do corte
-      p = p.feed(3)
-
-      if (corteAutomatico) {
-        p = p.cut()
-      }
-
-      p.close(function () {
+      try {
+        execSync(`cmd /c copy /b "${tmpFile}" ${PORTA_USB_WINDOWS}`, { stdio: 'ignore' })
         resolve(true)
-      })
-    })
+      } catch (e) {
+        reject(new Error(`Falha ao enviar para porta USB ${PORTA_USB_WINDOWS}: ${e.message}`))
+      } finally {
+        try { fs.unlinkSync(tmpFile) } catch (_) {}
+      }
+    } catch (e) {
+      reject(new Error(`Erro ao preparar cupom USB: ${e.message}`))
+    }
   })
 }
 
