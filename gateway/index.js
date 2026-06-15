@@ -31,27 +31,6 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
-// =====================================================
-// Suporte a impressora USB via porta Windows (ex: USB001)
-// =====================================================
-const { execSync } = require('child_process')
-const fs = require('fs')
-const os = require('os')
-const path = require('path')
-
-// Detectar a porta USB da impressora automaticamente
-function detectarPortaUSBWindows() {
-  try {
-    const saida = execSync('powershell -Command "Get-PrinterPort | Select-Object Name | Format-List"', { encoding: 'utf8' })
-    const match = saida.match(/Name\s*:\s*(USB\d+)/i)
-    if (match) return match[1]
-  } catch (_) {}
-  return 'USB001' // fallback padrão
-}
-
-const PORTA_USB_WINDOWS = detectarPortaUSBWindows()
-console.log(`📌 Porta USB Windows detectada: ${PORTA_USB_WINDOWS}`)
-
 console.log(`
 ╔══════════════════════════════════════════╗
 ║     GATEWAY DE IMPRESSÃO — v2.0.0       ║
@@ -119,14 +98,9 @@ async function processarItem(item) {
     return
   }
 
-  if (tipo_conexao === 'usb') {
-    // Verificar se porta USB existe no sistema
-    try {
-      execSync(`powershell -Command "Get-PrinterPort -Name ${PORTA_USB_WINDOWS} -ErrorAction Stop"`, { stdio: 'ignore' })
-    } catch (_) {
-      await marcarFalha(id, `Porta USB Windows '${PORTA_USB_WINDOWS}' não encontrada. Verifique se a impressora está conectada.`)
-      return
-    }
+  if (tipo_conexao === 'usb' && !ip) {
+    await marcarFalha(id, 'Nome da impressora no Windows não configurado no campo de IP')
+    return
   }
 
   // Marcar como imprimindo
@@ -134,12 +108,12 @@ async function processarItem(item) {
     .update({ status: 'imprimindo', processando_em: new Date().toISOString(), tentativas: tentativas + 1 })
     .eq('id', id)
 
-  const destino = tipo_conexao === 'usb' ? 'USB' : `${ip}:${porta}`
+  const destino = tipo_conexao === 'usb' ? `USB (${ip})` : `${ip}:${porta}`
   console.log(`🖨️  Imprimindo item ${id} → ${impressora.nome} (${destino})`)
 
   try {
     if (tipo_conexao === 'usb') {
-      await enviarParaImpressoraUSB(conteudo, corte_automatico)
+      await enviarParaImpressoraUSB(ip, conteudo, corte_automatico)
     } else {
       await enviarParaImpressoraTCP(ip, porta, conteudo, corte_automatico)
     }
@@ -176,11 +150,12 @@ async function processarItem(item) {
 }
 
 // =====================================================
-// Enviar via USB — Windows nativo (copy /b para porta USB)
+// Enviar via USB — Windows nativo usando Spooler (C# RAW)
 // =====================================================
-function enviarParaImpressoraUSB(conteudo, corteAutomatico) {
+function enviarParaImpressoraUSB(printerName, conteudo, corteAutomatico) {
   return new Promise((resolve, reject) => {
     try {
+      const { execSync } = require('child_process')
       const ESC = 0x1B
       const GS  = 0x1D
       const cmdInit    = Buffer.from([ESC, 0x40])
@@ -197,20 +172,67 @@ function enviarParaImpressoraUSB(conteudo, corteAutomatico) {
         cmdCorte,
       ])
 
-      // Salvar em arquivo temporário e copiar para porta USB (confiável no Windows)
-      const tmpFile = path.join(os.tmpdir(), `cupom_${Date.now()}.bin`)
-      fs.writeFileSync(tmpFile, payload)
+      const base64Payload = payload.toString('base64')
 
-      try {
-        execSync(`cmd /c copy /b "${tmpFile}" ${PORTA_USB_WINDOWS}`, { stdio: 'ignore' })
-        resolve(true)
-      } catch (e) {
-        reject(new Error(`Falha ao enviar para porta USB ${PORTA_USB_WINDOWS}: ${e.message}`))
-      } finally {
-        try { fs.unlinkSync(tmpFile) } catch (_) {}
-      }
+      const psScript = `
+$code = @"
+using System;
+using System.Runtime.InteropServices;
+public class RawPrint {
+    [DllImport("winspool.Drv", EntryPoint="OpenPrinterA", SetLastError=true, CharSet=CharSet.Ansi, ExactSpelling=true, CallingConvention=CallingConvention.StdCall)]
+    public static extern bool OpenPrinter([MarshalAs(UnmanagedType.LPStr)] string szPrinter, out IntPtr hPrinter, IntPtr pd);
+    [DllImport("winspool.Drv", EntryPoint="ClosePrinter", SetLastError=true, ExactSpelling=true, CallingConvention=CallingConvention.StdCall)]
+    public static extern bool ClosePrinter(IntPtr hPrinter);
+    [DllImport("winspool.Drv", EntryPoint="StartDocPrinterA", SetLastError=true, CharSet=CharSet.Ansi, ExactSpelling=true, CallingConvention=CallingConvention.StdCall)]
+    public static extern bool StartDocPrinter(IntPtr hPrinter, int level, [In, MarshalAs(UnmanagedType.LPStruct)] DOCINFOA di);
+    [DllImport("winspool.Drv", EntryPoint="EndDocPrinter", SetLastError=true, ExactSpelling=true, CallingConvention=CallingConvention.StdCall)]
+    public static extern bool EndDocPrinter(IntPtr hPrinter);
+    [DllImport("winspool.Drv", EntryPoint="StartPagePrinter", SetLastError=true, ExactSpelling=true, CallingConvention=CallingConvention.StdCall)]
+    public static extern bool StartPagePrinter(IntPtr hPrinter);
+    [DllImport("winspool.Drv", EntryPoint="EndPagePrinter", SetLastError=true, ExactSpelling=true, CallingConvention=CallingConvention.StdCall)]
+    public static extern bool EndPagePrinter(IntPtr hPrinter);
+    [DllImport("winspool.Drv", EntryPoint="WritePrinter", SetLastError=true, ExactSpelling=true, CallingConvention=CallingConvention.StdCall)]
+    public static extern bool WritePrinter(IntPtr hPrinter, IntPtr pBytes, int dwCount, out int dwWritten);
+    [StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
+    public class DOCINFOA {
+        [MarshalAs(UnmanagedType.LPStr)] public string pDocName;
+        [MarshalAs(UnmanagedType.LPStr)] public string pOutputFile;
+        [MarshalAs(UnmanagedType.LPStr)] public string pDataType;
+    }
+    public static bool Print(string printerName, byte[] payload) {
+        IntPtr pUnmanagedBytes = Marshal.AllocCoTaskMem(payload.Length);
+        Marshal.Copy(payload, 0, pUnmanagedBytes, payload.Length);
+        bool success = false;
+        IntPtr hPrinter = new IntPtr(0);
+        DOCINFOA di = new DOCINFOA();
+        di.pDocName = "Cupom_NodeJS";
+        di.pDataType = "RAW";
+        if (OpenPrinter(printerName.Normalize(), out hPrinter, IntPtr.Zero)) {
+            if (StartDocPrinter(hPrinter, 1, di)) {
+                if (StartPagePrinter(hPrinter)) {
+                    int dwWritten = 0;
+                    success = WritePrinter(hPrinter, pUnmanagedBytes, payload.Length, out dwWritten);
+                    EndPagePrinter(hPrinter);
+                }
+                EndDocPrinter(hPrinter);
+            }
+            ClosePrinter(hPrinter);
+        }
+        Marshal.FreeCoTaskMem(pUnmanagedBytes);
+        return success;
+    }
+}
+"@
+Add-Type -TypeDefinition $code -Language CSharp
+$bytes = [System.Convert]::FromBase64String("${base64Payload}")
+$res = [RawPrint]::Print("${printerName}", $bytes)
+if (-not $res) { throw "Falha na impressao RAW da impressora ${printerName}" }
+`;
+
+      execSync('powershell -Command -', { input: psScript, stdio: 'pipe' })
+      resolve(true)
     } catch (e) {
-      reject(new Error(`Erro ao preparar cupom USB: ${e.message}`))
+      reject(new Error(`Falha ao imprimir na USB: ${e.stderr ? e.stderr.toString() : e.message}`))
     }
   })
 }

@@ -65,13 +65,16 @@ export default function ImpressorasPage() {
   }
 
   async function salvar() {
-    const precisaRede = !isUSB(form.tipo_conexao)
     if (!form.nome.trim()) {
       toast.error('O nome da impressora é obrigatório')
       return
     }
-    if (precisaRede && (!form.endereco_ip.trim() || !form.porta)) {
+    if (form.tipo_conexao === 'ethernet' && (!form.endereco_ip.trim() || !form.porta)) {
       toast.error('IP e Porta são obrigatórios para conexão Ethernet')
+      return
+    }
+    if (form.tipo_conexao === 'usb' && !form.endereco_ip.trim()) {
+      toast.error('O nome da impressora no Windows é obrigatório para conexão USB')
       return
     }
 
@@ -81,8 +84,8 @@ export default function ImpressorasPage() {
         nome: form.nome.trim(),
         setor: form.setor,
         tipo_conexao: form.tipo_conexao,
-        endereco_ip: isUSB(form.tipo_conexao) ? null : form.endereco_ip.trim(),
-        porta: isUSB(form.tipo_conexao) ? null : parseInt(form.porta),
+        endereco_ip: form.endereco_ip.trim(),
+        porta: form.tipo_conexao === 'usb' ? null : parseInt(form.porta),
         largura_papel: form.largura_papel,
         corte_automatico: form.corte_automatico,
         impressao_automatica: form.impressao_automatica,
@@ -154,7 +157,7 @@ export default function ImpressorasPage() {
                     </h3>
                     <p className="text-sm text-text-muted flex items-center gap-2 mt-1">
                       {imp.tipo_conexao === 'usb'
-                        ? <><Usb className="w-3.5 h-3.5" /> Conexão USB</>                      
+                        ? <><Usb className="w-3.5 h-3.5" /> USB: {imp.endereco_ip}</>                      
                         : <><Wifi className="w-3.5 h-3.5" /> {imp.endereco_ip}:{imp.porta}</>}
                     </p>
                   </div>
@@ -286,12 +289,21 @@ export default function ImpressorasPage() {
 
                 {/* Info USB */}
                 {isUSB(form.tipo_conexao) && (
-                  <div className="col-span-2 bg-brand-accent/10 border border-brand-accent/20 rounded-xl p-4 flex gap-3 text-sm text-brand-accent">
-                    <Usb className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-bold mb-1">Impressora conectada via cabo USB</p>
-                      <p className="text-xs opacity-80">O gateway detecta automaticamente a impressora USB. Certifique-se que o cabo está conectado e o driver instalado no computador onde o gateway roda.</p>
+                  <div className="col-span-2">
+                    <div className="bg-brand-accent/10 border border-brand-accent/20 rounded-xl p-4 flex gap-3 text-sm text-brand-accent mb-4">
+                      <Usb className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-bold mb-1">Impressora conectada via cabo USB</p>
+                        <p className="text-xs opacity-80">No Windows, abra "Impressoras e scanners" e copie exatamente o nome da impressora instalada (ex: POS-80C).</p>
+                      </div>
                     </div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Nome da Impressora no Windows</label>
+                    <input
+                      value={form.endereco_ip}
+                      onChange={e => setForm(f => ({...f, endereco_ip: e.target.value}))}
+                      placeholder="POS-80C (copy 2)"
+                      className="w-full bg-surface-bg border border-surface-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-accent text-text-main"
+                    />
                   </div>
                 )}
               </div>
