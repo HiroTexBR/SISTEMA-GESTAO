@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Mesa, Comanda, ComandaItem, Produto, Categoria, Adicional, ProdutoAdicionalConfig } from '@/lib/types'
-import { formatCurrency } from '@/lib/utils'
+import { formatCurrency, formatMesaName } from '@/lib/utils'
 import {
   ArrowLeft, Plus, Minus, Trash2, Send,
   Search, ShoppingCart, ChevronRight, Loader2, X,
@@ -271,7 +271,7 @@ export default function ComandaPage() {
 
       if (impressora) {
         const linhas = [
-          '', `        MESA ${mesa?.numero || '?'}`,
+          '', `        ${formatMesaName(mesa?.numero).toUpperCase()}`,
           `     COMANDA #${String(comanda?.numero || '?').padStart(6, '0')}`,
           `GARÇOM: ${usuarioData?.nome || '?'}`,
           `HORÁRIO: ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`,

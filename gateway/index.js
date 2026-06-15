@@ -14,7 +14,14 @@
 
 require('dotenv').config()
 const net = require('net')
+const fs = require('fs')
+const os = require('os')
+const path = require('path')
+const { spawn, execFileSync } = require('child_process')
 const { createClient } = require('@supabase/supabase-js')
+
+// Variáveis globais removidas pois voltamos ao modo de arquivo temporário
+
 
 // =====================================================
 // Configuração
@@ -103,10 +110,17 @@ async function processarItem(item) {
     return
   }
 
-  // Marcar como imprimindo
-  await supabase.from('fila_impressao')
-    .update({ status: 'imprimindo', processando_em: new Date().toISOString(), tentativas: tentativas + 1 })
+  // Marcar como imprimindo (com trava de concorrência)
+  const { data: claimData } = await supabase.from('fila_impressao')
+    .update({ status: 'imprimindo', processando_em: new Date().toISOString(), tentativas: (tentativas || 0) + 1 })
     .eq('id', id)
+    .eq('status', 'pendente')
+    .select()
+
+  // Se claimData vier vazio, significa que outro gateway já puxou esse pedido!
+  if (!claimData || claimData.length === 0) {
+    return
+  }
 
   const destino = tipo_conexao === 'usb' ? `USB (${ip})` : `${ip}:${porta}`
   console.log(`🖨️  Imprimindo item ${id} → ${impressora.nome} (${destino})`)
@@ -134,7 +148,7 @@ async function processarItem(item) {
     const mensagemErro = err.message || 'Erro desconhecido'
     console.error(`❌ Falha ao imprimir item ${id}: ${mensagemErro}`)
 
-    if (tentativas + 1 >= MAX_TENTATIVAS) {
+    if ((tentativas || 0) + 1 >= MAX_TENTATIVAS) {
       await marcarFalha(id, mensagemErro)
     } else {
       const proximoRetry = new Date(Date.now() + 30000).toISOString()
@@ -150,12 +164,12 @@ async function processarItem(item) {
 }
 
 // =====================================================
-// Enviar via USB — Windows nativo usando Spooler (C# RAW)
+// Enviar via USB — C# RAW via arquivo .ps1 temporário
+// (stdin pipe trunca o script; -File é confiável)
 // =====================================================
 function enviarParaImpressoraUSB(printerName, conteudo, corteAutomatico) {
   return new Promise((resolve, reject) => {
     try {
-      const { execSync } = require('child_process')
       const ESC = 0x1B
       const GS  = 0x1D
       const cmdInit    = Buffer.from([ESC, 0x40])
@@ -164,75 +178,72 @@ function enviarParaImpressoraUSB(printerName, conteudo, corteAutomatico) {
         ? Buffer.from([GS, 0x56, 0x41, 0x00])
         : Buffer.alloc(0)
 
+      // Normalize \n to \r\n for thermal printers (POS ignores raw \n)
+      const normalizedConteudo = conteudo.replace(/(?<!\r)\n/g, '\r\n')
+
       const payload = Buffer.concat([
         cmdInit,
         cmdCharset,
-        Buffer.from(conteudo, 'latin1'),
+        Buffer.from(normalizedConteudo, 'latin1'),
         Buffer.from('\r\n\r\n\r\n'),
         cmdCorte,
       ])
 
-      const base64Payload = payload.toString('base64')
+      const b64 = payload.toString('base64')
 
-      const psScript = `
-$code = @"
-using System;
-using System.Runtime.InteropServices;
-public class RawPrint {
-    [DllImport("winspool.Drv", EntryPoint="OpenPrinterA", SetLastError=true, CharSet=CharSet.Ansi, ExactSpelling=true, CallingConvention=CallingConvention.StdCall)]
-    public static extern bool OpenPrinter([MarshalAs(UnmanagedType.LPStr)] string szPrinter, out IntPtr hPrinter, IntPtr pd);
-    [DllImport("winspool.Drv", EntryPoint="ClosePrinter", SetLastError=true, ExactSpelling=true, CallingConvention=CallingConvention.StdCall)]
-    public static extern bool ClosePrinter(IntPtr hPrinter);
-    [DllImport("winspool.Drv", EntryPoint="StartDocPrinterA", SetLastError=true, CharSet=CharSet.Ansi, ExactSpelling=true, CallingConvention=CallingConvention.StdCall)]
-    public static extern bool StartDocPrinter(IntPtr hPrinter, int level, [In, MarshalAs(UnmanagedType.LPStruct)] DOCINFOA di);
-    [DllImport("winspool.Drv", EntryPoint="EndDocPrinter", SetLastError=true, ExactSpelling=true, CallingConvention=CallingConvention.StdCall)]
-    public static extern bool EndDocPrinter(IntPtr hPrinter);
-    [DllImport("winspool.Drv", EntryPoint="StartPagePrinter", SetLastError=true, ExactSpelling=true, CallingConvention=CallingConvention.StdCall)]
-    public static extern bool StartPagePrinter(IntPtr hPrinter);
-    [DllImport("winspool.Drv", EntryPoint="EndPagePrinter", SetLastError=true, ExactSpelling=true, CallingConvention=CallingConvention.StdCall)]
-    public static extern bool EndPagePrinter(IntPtr hPrinter);
-    [DllImport("winspool.Drv", EntryPoint="WritePrinter", SetLastError=true, ExactSpelling=true, CallingConvention=CallingConvention.StdCall)]
-    public static extern bool WritePrinter(IntPtr hPrinter, IntPtr pBytes, int dwCount, out int dwWritten);
-    [StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
-    public class DOCINFOA {
-        [MarshalAs(UnmanagedType.LPStr)] public string pDocName;
-        [MarshalAs(UnmanagedType.LPStr)] public string pOutputFile;
-        [MarshalAs(UnmanagedType.LPStr)] public string pDataType;
-    }
-    public static bool Print(string printerName, byte[] payload) {
-        IntPtr pUnmanagedBytes = Marshal.AllocCoTaskMem(payload.Length);
-        Marshal.Copy(payload, 0, pUnmanagedBytes, payload.Length);
-        bool success = false;
-        IntPtr hPrinter = new IntPtr(0);
-        DOCINFOA di = new DOCINFOA();
-        di.pDocName = "Cupom_NodeJS";
-        di.pDataType = "RAW";
-        if (OpenPrinter(printerName.Normalize(), out hPrinter, IntPtr.Zero)) {
-            if (StartDocPrinter(hPrinter, 1, di)) {
-                if (StartPagePrinter(hPrinter)) {
-                    int dwWritten = 0;
-                    success = WritePrinter(hPrinter, pUnmanagedBytes, payload.Length, out dwWritten);
-                    EndPagePrinter(hPrinter);
-                }
-                EndDocPrinter(hPrinter);
-            }
-            ClosePrinter(hPrinter);
-        }
-        Marshal.FreeCoTaskMem(pUnmanagedBytes);
-        return success;
-    }
+      const psContent = `
+Add-Type -Language CSharp -TypeDefinition @'
+using System;using System.Runtime.InteropServices;
+public class RawPr {
+  [DllImport("winspool.Drv",EntryPoint="OpenPrinterA",SetLastError=true,CharSet=CharSet.Ansi,ExactSpelling=true,CallingConvention=CallingConvention.StdCall)]
+  public static extern bool OpenPrinter(string n,out IntPtr h,IntPtr p);
+  [DllImport("winspool.Drv",EntryPoint="ClosePrinter",SetLastError=true,ExactSpelling=true,CallingConvention=CallingConvention.StdCall)]
+  public static extern bool ClosePrinter(IntPtr h);
+  [DllImport("winspool.Drv",EntryPoint="StartDocPrinterA",SetLastError=true,CharSet=CharSet.Ansi,ExactSpelling=true,CallingConvention=CallingConvention.StdCall)]
+  public static extern bool StartDocPrinter(IntPtr h,int l,[In,MarshalAs(UnmanagedType.LPStruct)]DOCINFOA d);
+  [DllImport("winspool.Drv",EntryPoint="EndDocPrinter",SetLastError=true,ExactSpelling=true,CallingConvention=CallingConvention.StdCall)]
+  public static extern bool EndDocPrinter(IntPtr h);
+  [DllImport("winspool.Drv",EntryPoint="StartPagePrinter",SetLastError=true,ExactSpelling=true,CallingConvention=CallingConvention.StdCall)]
+  public static extern bool StartPagePrinter(IntPtr h);
+  [DllImport("winspool.Drv",EntryPoint="EndPagePrinter",SetLastError=true,ExactSpelling=true,CallingConvention=CallingConvention.StdCall)]
+  public static extern bool EndPagePrinter(IntPtr h);
+  [DllImport("winspool.Drv",EntryPoint="WritePrinter",SetLastError=true,ExactSpelling=true,CallingConvention=CallingConvention.StdCall)]
+  public static extern bool WritePrinter(IntPtr h,IntPtr b,int c,out int w);
+  [StructLayout(LayoutKind.Sequential,CharSet=CharSet.Ansi)]
+  public class DOCINFOA{[MarshalAs(UnmanagedType.LPStr)]public string pDocName;[MarshalAs(UnmanagedType.LPStr)]public string pOutputFile;[MarshalAs(UnmanagedType.LPStr)]public string pDataType;}
+  public static bool Print(string n,byte[] data){
+    IntPtr p=Marshal.AllocCoTaskMem(data.Length);Marshal.Copy(data,0,p,data.Length);
+    bool ok=false;IntPtr h=IntPtr.Zero;
+    var d=new DOCINFOA();d.pDocName="Cupom";d.pDataType="RAW";
+    if(OpenPrinter(n,out h,IntPtr.Zero)){if(StartDocPrinter(h,1,d)){if(StartPagePrinter(h)){int w=0;ok=WritePrinter(h,p,data.Length,out w);EndPagePrinter(h);}EndDocPrinter(h);}ClosePrinter(h);}
+    Marshal.FreeCoTaskMem(p);return ok;
+  }
 }
-"@
-Add-Type -TypeDefinition $code -Language CSharp
-$bytes = [System.Convert]::FromBase64String("${base64Payload}")
-$res = [RawPrint]::Print("${printerName}", $bytes)
-if (-not $res) { throw "Falha na impressao RAW da impressora ${printerName}" }
-`;
+'@
+$bytes=[System.Convert]::FromBase64String("${b64}")
+$r=[RawPr]::Print("${printerName}",$bytes)
+if(-not $r){throw "Falha USB: erro $([System.Runtime.InteropServices.Marshal]::GetLastWin32Error())"}
+Write-Host "OK"
+`
 
-      execSync('powershell -Command -', { input: psScript, stdio: 'pipe' })
-      resolve(true)
+      const tmpPs = path.join(os.tmpdir(), `cupom_${Date.now()}.ps1`)
+      fs.writeFileSync(tmpPs, psContent, 'utf8')
+
+      try {
+        execFileSync('powershell', [
+          '-ExecutionPolicy', 'Bypass',
+          '-NonInteractive',
+          '-File', tmpPs,
+        ], { encoding: 'utf8', stdio: 'pipe' })
+        resolve(true)
+      } catch (e) {
+        const errOut = (e.stdout || '') + (e.stderr || '') + e.message
+        reject(new Error(`Falha USB (${printerName}): ${errOut.trim()}`))
+      } finally {
+        try { fs.unlinkSync(tmpPs) } catch (_) {}
+      }
     } catch (e) {
-      reject(new Error(`Falha ao imprimir na USB: ${e.stderr ? e.stderr.toString() : e.message}`))
+      reject(new Error(`Erro ao preparar cupom USB: ${e.message}`))
     }
   })
 }
