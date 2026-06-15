@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   Printer, Plus, Edit2, Trash2, X, Loader2, CheckCircle2,
-  Server, Settings, Wifi
+  Server, Settings, Wifi, Usb
 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Impressora } from '@/lib/types'
@@ -21,6 +21,8 @@ const FORM_INICIAL = {
   modo_teste: false,
   ativa: true
 }
+
+const isUSB = (tipo: string) => tipo === 'usb'
 
 export default function ImpressorasPage() {
   const supabase = createClient()
@@ -63,8 +65,13 @@ export default function ImpressorasPage() {
   }
 
   async function salvar() {
-    if (!form.nome.trim() || !form.endereco_ip.trim() || !form.porta) {
-      toast.error('Nome, IP e Porta são obrigatórios')
+    const precisaRede = !isUSB(form.tipo_conexao)
+    if (!form.nome.trim()) {
+      toast.error('O nome da impressora é obrigatório')
+      return
+    }
+    if (precisaRede && (!form.endereco_ip.trim() || !form.porta)) {
+      toast.error('IP e Porta são obrigatórios para conexão Ethernet')
       return
     }
 
@@ -74,8 +81,8 @@ export default function ImpressorasPage() {
         nome: form.nome.trim(),
         setor: form.setor,
         tipo_conexao: form.tipo_conexao,
-        endereco_ip: form.endereco_ip.trim(),
-        porta: parseInt(form.porta),
+        endereco_ip: isUSB(form.tipo_conexao) ? null : form.endereco_ip.trim(),
+        porta: isUSB(form.tipo_conexao) ? null : parseInt(form.porta),
         largura_papel: form.largura_papel,
         corte_automatico: form.corte_automatico,
         impressao_automatica: form.impressao_automatica,
@@ -146,7 +153,9 @@ export default function ImpressorasPage() {
                       {imp.modo_teste && <span className="text-[10px] bg-[var(--color-status-wait)]/10 text-[var(--color-status-wait)] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">Simulação</span>}
                     </h3>
                     <p className="text-sm text-text-muted flex items-center gap-2 mt-1">
-                      <Wifi className="w-3.5 h-3.5" /> {imp.endereco_ip}:{imp.porta}
+                      {imp.tipo_conexao === 'usb'
+                        ? <><Usb className="w-3.5 h-3.5" /> Conexão USB</>                      
+                        : <><Wifi className="w-3.5 h-3.5" /> {imp.endereco_ip}:{imp.porta}</>}
                     </p>
                   </div>
                 </div>
@@ -226,25 +235,65 @@ export default function ImpressorasPage() {
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Endereço IP (Rede local)</label>
-                  <input
-                    value={form.endereco_ip}
-                    onChange={e => setForm(f => ({...f, endereco_ip: e.target.value}))}
-                    placeholder="192.168.0.100"
-                    className="w-full bg-surface-bg border border-surface-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-accent font-mono text-text-main"
-                  />
+                {/* Tipo de Conexão */}
+                <div className="col-span-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Tipo de Conexão</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {(['ethernet', 'usb'] as const).map(tipo => (
+                      <button
+                        key={tipo}
+                        type="button"
+                        onClick={() => setForm(f => ({ ...f, tipo_conexao: tipo }))}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-sm font-bold transition-all ${
+                          form.tipo_conexao === tipo
+                            ? 'border-brand-accent bg-brand-accent/10 text-brand-accent'
+                            : 'border-surface-border bg-surface-bg text-text-muted hover:border-brand-accent/50'
+                        }`}
+                      >
+                        {tipo === 'usb'
+                          ? <Usb className="w-4 h-4" />
+                          : <Wifi className="w-4 h-4" />}
+                        {tipo === 'usb' ? 'USB (cabo)' : 'Ethernet / Wi-Fi'}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Porta TCP</label>
-                  <input
-                    value={form.porta}
-                    onChange={e => setForm(f => ({...f, porta: e.target.value}))}
-                    placeholder="9100"
-                    className="w-full bg-surface-bg border border-surface-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-accent font-mono text-text-main"
-                  />
-                </div>
+                {/* Campos de rede — visíveis apenas para Ethernet */}
+                {!isUSB(form.tipo_conexao) && (
+                  <>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Endereço IP (Rede local)</label>
+                      <input
+                        value={form.endereco_ip}
+                        onChange={e => setForm(f => ({...f, endereco_ip: e.target.value}))}
+                        placeholder="192.168.0.100"
+                        className="w-full bg-surface-bg border border-surface-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-accent font-mono text-text-main"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Porta TCP</label>
+                      <input
+                        value={form.porta}
+                        onChange={e => setForm(f => ({...f, porta: e.target.value}))}
+                        placeholder="9100"
+                        className="w-full bg-surface-bg border border-surface-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-accent font-mono text-text-main"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Info USB */}
+                {isUSB(form.tipo_conexao) && (
+                  <div className="col-span-2 bg-brand-accent/10 border border-brand-accent/20 rounded-xl p-4 flex gap-3 text-sm text-brand-accent">
+                    <Usb className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold mb-1">Impressora conectada via cabo USB</p>
+                      <p className="text-xs opacity-80">O gateway detecta automaticamente a impressora USB. Certifique-se que o cabo está conectado e o driver instalado no computador onde o gateway roda.</p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="bg-surface-bg border border-surface-border rounded-2xl p-5 space-y-4">

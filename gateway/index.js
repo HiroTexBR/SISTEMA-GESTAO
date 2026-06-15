@@ -1,17 +1,15 @@
 /**
  * GATEWAY DE IMPRESSÃO — Sistema Império Pastéis
- * 
- * Este serviço Node.js monitora a fila de impressão no Supabase
- * e envia os comandos ESC/POS para as impressoras térmicas via TCP/IP.
- * 
+ *
+ * Suporta dois modos de conexão:
+ *   - ethernet: envia comandos ESC/POS via TCP/IP (porta 9100)
+ *   - usb:      envia comandos ESC/POS direto via USB (ex: KP-IMP609)
+ *
  * INSTALAÇÃO:
  *   cd gateway
  *   npm install
  *   cp .env.example .env  (e preencher as variáveis)
  *   node index.js
- * 
- * REQUISITO: Rodar em um dispositivo na mesma rede local das impressoras.
- * Pode ser um Raspberry Pi, mini PC, ou qualquer computador/Android com Node.js.
  */
 
 require('dotenv').config()
@@ -33,9 +31,24 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
+// =====================================================
+// Carregar biblioteca USB (opcional — só falha se tentar usar)
+// =====================================================
+let escpos = null
+let EscPosUSB = null
+
+try {
+  escpos = require('escpos')
+  escpos.USB = require('escpos-usb')
+  EscPosUSB = escpos.USB
+  console.log('✅ Biblioteca escpos-usb carregada com sucesso')
+} catch (e) {
+  console.warn('⚠️  escpos-usb não disponível — impressão USB desabilitada:', e.message)
+}
+
 console.log(`
 ╔══════════════════════════════════════════╗
-║     GATEWAY DE IMPRESSÃO — v1.0.0       ║
+║     GATEWAY DE IMPRESSÃO — v2.0.0       ║
 ║     Sistema Império Pastéis             ║
 ╚══════════════════════════════════════════╝
 🔌 Conectado ao Supabase: ${SUPABASE_URL}
@@ -52,7 +65,6 @@ async function verificarFila() {
   processando = true
 
   try {
-    // Buscar itens pendentes
     const { data: itens, error } = await supabase
       .from('fila_impressao')
       .select('*, impressora:impressoras(*)')
@@ -93,10 +105,16 @@ async function processarItem(item) {
     return
   }
 
-  const { endereco_ip: ip, porta, largura_papel, corte_automatico } = impressora
+  const { tipo_conexao, endereco_ip: ip, porta, corte_automatico } = impressora
 
-  if (!ip || !porta) {
-    await marcarFalha(id, 'IP ou porta da impressora não configurados')
+  // Validar configurações por tipo de conexão
+  if (tipo_conexao === 'ethernet' && (!ip || !porta)) {
+    await marcarFalha(id, 'IP ou porta da impressora não configurados para conexão Ethernet')
+    return
+  }
+
+  if (tipo_conexao === 'usb' && !EscPosUSB) {
+    await marcarFalha(id, 'Biblioteca escpos-usb não carregada — rode "npm install" no gateway')
     return
   }
 
@@ -105,17 +123,21 @@ async function processarItem(item) {
     .update({ status: 'imprimindo', processando_em: new Date().toISOString(), tentativas: tentativas + 1 })
     .eq('id', id)
 
-  console.log(`🖨️  Imprimindo item ${id} → ${impressora.nome} (${ip}:${porta})`)
+  const destino = tipo_conexao === 'usb' ? 'USB' : `${ip}:${porta}`
+  console.log(`🖨️  Imprimindo item ${id} → ${impressora.nome} (${destino})`)
 
   try {
-    await enviarParaImpressora(ip, porta, conteudo, corte_automatico)
+    if (tipo_conexao === 'usb') {
+      await enviarParaImpressoraUSB(conteudo, corte_automatico)
+    } else {
+      await enviarParaImpressoraTCP(ip, porta, conteudo, corte_automatico)
+    }
 
     // Sucesso
     await supabase.from('fila_impressao')
       .update({ status: 'impresso', impresso_em: new Date().toISOString() })
       .eq('id', id)
 
-    // Atualizar status do pedido de produção se aplicável
     if (item.pedido_producao_id) {
       await supabase.from('pedidos_producao')
         .update({ status_impressao: 'impresso' })
@@ -130,7 +152,6 @@ async function processarItem(item) {
     if (tentativas + 1 >= MAX_TENTATIVAS) {
       await marcarFalha(id, mensagemErro)
     } else {
-      // Reagendar para retry em 30s
       const proximoRetry = new Date(Date.now() + 30000).toISOString()
       await supabase.from('fila_impressao')
         .update({
@@ -144,32 +165,78 @@ async function processarItem(item) {
 }
 
 // =====================================================
-// Enviar conteúdo para a impressora via TCP
+// Enviar via USB — usa escpos + escpos-usb
 // =====================================================
-function enviarParaImpressora(ip, porta, conteudo, corteAutomatico) {
+function enviarParaImpressoraUSB(conteudo, corteAutomatico) {
+  return new Promise((resolve, reject) => {
+    if (!EscPosUSB) {
+      return reject(new Error('escpos-usb não disponível'))
+    }
+
+    let device
+    try {
+      // Busca a primeira impressora USB ESC/POS disponível
+      const devices = EscPosUSB.findPrinter()
+      if (!devices || devices.length === 0) {
+        return reject(new Error('Nenhuma impressora USB encontrada. Verifique o cabo USB e o driver.'))
+      }
+      device = new EscPosUSB(devices[0])
+    } catch (e) {
+      return reject(new Error(`Erro ao localizar impressora USB: ${e.message}`))
+    }
+
+    device.open(function (err) {
+      if (err) {
+        return reject(new Error(`Erro ao abrir impressora USB: ${err.message}`))
+      }
+
+      const printer = new escpos.Printer(device)
+
+      // Montar saída linha por linha
+      const linhas = conteudo.split('\n')
+
+      let p = printer
+        .font('a')
+        .align('lt')
+        .style('normal')
+        .size(1, 1)
+
+      for (const linha of linhas) {
+        p = p.text(linha)
+      }
+
+      // Avanço de papel antes do corte
+      p = p.feed(3)
+
+      if (corteAutomatico) {
+        p = p.cut()
+      }
+
+      p.close(function () {
+        resolve(true)
+      })
+    })
+  })
+}
+
+// =====================================================
+// Enviar via TCP/IP — socket direto na porta 9100
+// =====================================================
+function enviarParaImpressoraTCP(ip, porta, conteudo, corteAutomatico) {
   return new Promise((resolve, reject) => {
     const socket = new net.Socket()
     const TIMEOUT = 8000
 
     socket.setTimeout(TIMEOUT)
 
-    // Converter conteúdo para Buffer com encoding correto (CP850 para PT)
-    const encoder = new TextEncoder()
-    const dados = encoder.encode(conteudo + '\n')
-
     // Comandos ESC/POS
     const ESC = 0x1B
     const GS = 0x1D
 
-    // Inicializar impressora
-    const cmdInit = Buffer.from([ESC, 0x40])
-
-    // Configurar charset para Latin-1 (acentos PT-BR)
-    const cmdCharset = Buffer.from([ESC, 0x74, 0x02]) // Código de página CP850
-
-    // Corte automático (se suportado)
-    const cmdCorte = corteAutomatico
-      ? Buffer.from([GS, 0x56, 0x42, 0x00]) // Corte parcial
+    const cmdInit    = Buffer.from([ESC, 0x40])          // Inicializar
+    const cmdCharset = Buffer.from([ESC, 0x74, 0x02])    // CP850 — acentos PT-BR
+    const cmdCorte   = corteAutomatico
+      ? Buffer.from([GS, 0x56, 0x42, 0x00])              // Corte parcial
       : Buffer.alloc(0)
 
     const payload = Buffer.concat([
@@ -184,10 +251,8 @@ function enviarParaImpressora(ip, porta, conteudo, corteAutomatico) {
       socket.write(payload, (err) => {
         if (err) {
           socket.destroy()
-          reject(new Error(`Erro ao enviar dados: ${err.message}`))
-          return
+          return reject(new Error(`Erro ao enviar dados: ${err.message}`))
         }
-        // Dar tempo para a impressora processar
         setTimeout(() => {
           socket.destroy()
           resolve(true)
@@ -214,11 +279,17 @@ async function marcarFalha(filaId, erro) {
     .update({ status: 'falhou', erro })
     .eq('id', filaId)
 
-  // Atualizar pedido se aplicável
-  await supabase.from('pedidos_producao')
-    .update({ status_impressao: 'falhou' })
-    .eq('id', (await supabase.from('fila_impressao').select('pedido_producao_id').eq('id', filaId).single()).data?.pedido_producao_id)
-    .not('pedido_producao_id', 'is', null)
+  const { data } = await supabase
+    .from('fila_impressao')
+    .select('pedido_producao_id')
+    .eq('id', filaId)
+    .single()
+
+  if (data?.pedido_producao_id) {
+    await supabase.from('pedidos_producao')
+      .update({ status_impressao: 'falhou' })
+      .eq('id', data.pedido_producao_id)
+  }
 }
 
 // =====================================================
@@ -226,8 +297,6 @@ async function marcarFalha(filaId, erro) {
 // =====================================================
 async function processarRetries() {
   const agora = new Date().toISOString()
-  
-  // Resetar itens cujo retry chegou
   await supabase.from('fila_impressao')
     .update({ status: 'pendente', proximo_retry_em: null })
     .eq('status', 'pendente')
@@ -239,18 +308,9 @@ async function processarRetries() {
 // Iniciar loops
 // =====================================================
 setInterval(verificarFila, POLL_INTERVAL_MS)
-setInterval(processarRetries, 10000) // Verificar retries a cada 10s
+setInterval(processarRetries, 10000)
 
-// Primeira execução imediata
 verificarFila()
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('\n🛑 Gateway encerrando...')
-  process.exit(0)
-})
-
-process.on('SIGINT', () => {
-  console.log('\n🛑 Gateway encerrando...')
-  process.exit(0)
-})
+process.on('SIGTERM', () => { console.log('\n🛑 Gateway encerrando...'); process.exit(0) })
+process.on('SIGINT',  () => { console.log('\n🛑 Gateway encerrando...'); process.exit(0) })
